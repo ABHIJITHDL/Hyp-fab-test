@@ -52,7 +52,7 @@ presetup(){
     popd
     echo Finished vendoring Go dependencies
 }
-# presetup
+#presetup
 
 CHANNEL_NAME="mychannel"
 CC_RUNTIME_LANGUAGE="golang"
@@ -144,9 +144,9 @@ checkCommitReadyness(){
 
 commitChaincodeDefination(){
     setGlobalsForPeer0Org1
-    set -x
+    #set -x  ## Turn on debugging mode
     peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED  --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --version ${VERSION} --sequence ${VERSION} --init-required
-    set +x
+    #set +x  ## Turn off debugging mode
    
 }
 
@@ -220,4 +220,4 @@ chaincodeQuery(){
 # queryCommitted
 # chaincodeInvokeInit
 # chaincodeInvoke
-chaincodeQuery
+ chaincodeQuery
