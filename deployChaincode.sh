@@ -208,16 +208,17 @@ chaincodeQuery(){
     #'{"Args":["GetSampleData","Key1"]}'
 }
 
-# presetup
-# packageChaincode
-# installChaincode
-# queryInstalled
-# approveForMyOrg1
-# checkCommitReadyness
-# approveForMyOrg2
-# checkCommitReadyness
-# commitChaincodeDefination
-# queryCommitted
-# chaincodeInvokeInit
-# chaincodeInvoke
- chaincodeQuery
+packageChaincode
+installChaincode
+queryInstalled
+approveForMyOrg1
+checkCommitReadyness
+approveForMyOrg2
+checkCommitReadyness
+commitChaincodeDefination
+queryCommitted
+chaincodeInvokeInit
+sleep 5
+chaincodeInvoke
+sleep 3
+chaincodeQuery
