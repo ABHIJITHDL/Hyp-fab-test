@@ -19,7 +19,7 @@ CHANNEL_NAME="mychannel"
 echo "---------------------------------------------"
 echo $CHANNEL_NAME
 
-export FABRIC_CFG_PATH=${PWD}/configtx
+#export FABRIC_CFG_PATH=${PWD}/configtx
 
 # Generate System Genesis block
 configtxgen -profile OrdererGenesis -configPath . -channelID $SYS_CHANNEL  -outputBlock ./genesis.block
