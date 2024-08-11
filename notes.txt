@@ -1,0 +1,95 @@
+comment orderer 2 & 3 info from policies in configtx.yaml 
+
+## add go package
+sudo apt update
+sudo apt install wget
+wget https://golang.org/dl/go1.21.0.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
+nano ~/.bashrc
+    export GOROOT=/usr/local/go
+    export PATH=$PATH:$GOROOT/bin
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOPATH/bin
+
+create channel-artifacts folder
+
+
+##connecting to a peer
+docker exec -it peer0.org1.example.com sh 
+peer channel list 
+exit
+
+##Setting go.mod for deployChaincode.sh
+cd /mnt/i/Applicaitons/BasicNetwork-2.0/artifacts/src/github.com/fabcar/go
+go mod tidy
+
+##approveForMyOrg1
+run together:
+ queryInstalled -> needed to set PACKAGE_ID
+ approveForMyOrg1
+
+##To add/remove a container from docker-compose.yaml from network, comment this.
+# networks:
+    #     - test
+
+
+volumes:
+      - ./channel/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+- ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+
+## api-1.4
+update network-config.yaml path with current folder structure
+
+##{
+  "name": "balance-transfer",
+  "version": "1.0.0",
+  "description": "Basic Network node program to demonstrate using node.js SDK APIs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "fabric-client sample app",
+    "balance-transfer node sample",
+    "v1.0 fabric nodesdk sample"
+  ],
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-bearer-token": "^2.4.0",
+    "express-jwt": "^8.4.1",
+    "express-session": "^1.17.3",
+    "fabric-ca-client": "^2.1.0",
+    "fabric-client": "^1.4.8",
+    "fs-extra": "^11.1.1",
+    "jsonwebtoken": "^9.0.0",
+    "log4js": "^6.9.1",
+    "prom-client": "^14.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
+
+##error in api-1.4\node_modules\fabric-client\types\tsconfig.json
+    "suppressImplicitAnyIndexErrors": true,
+    "ignoreDeprecations": "5.0", // Add this line to silence the deprecation warning
+
+##Tried on MSP validation. Don't know if it helped.
+CORE_PEER_LOCALMSPID=Org1MSP or CORE_PEER_LOCALMSPID="Org1MSP"
+
+## IF MSP validation error occurrs, delete fabric-client-kv folder and crypto folder
+
+##Deleting docker volumes not attatched to the current containers
+  docker volume ls
+  docker volume prune
