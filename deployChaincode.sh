@@ -207,8 +207,8 @@ chaincodeQuery(){
     peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "queryCar","Args":["CAR0"]}'
     #'{"Args":["GetSampleData","Key1"]}'
 }
-
-packageChaincode
+#presetup
+# packageChaincode
 installChaincode
 queryInstalled
 approveForMyOrg1

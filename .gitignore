@@ -6,7 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-notes.txt
+Hyperledger/fabric-samples
+Ehr_Nodejs/node_modules
+
+api-2.0/IssuerPublicKey
+api-2.0/IssuerRevocationPublicKey
+api-2.0/ca-cert.pem
+api-2.0/fabric-ca-server-config.yaml
+api-2.0/fabric-ca-server.db
+api-2.0/msp/
+api-2.0/org1-wallet/
+artifacts/channel/create-certificate-with-ca/fabric-ca/
+
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
