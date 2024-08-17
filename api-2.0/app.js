@@ -29,7 +29,8 @@ app.use(bodyParser.urlencoded({
 // set secret variable
 app.set('secret', 'thisismysecret');
 app.use(expressJWT({
-    secret: 'thisismysecret'
+    secret: 'thisismysecret',
+    algorithms: ['HS256']
 }).unless({
     path: ['/users']
 }));
@@ -112,54 +113,47 @@ app.post('/users', async function (req, res) {
 });
 
 // Invoke transaction on chaincode on target peers
-app.post('/channels/:channelName/chaincodes/:chaincodeName', async function (req, res) {
+app.post('/channels/:channelName/chaincodes/:chaincodeName', async (req, res) => {
+    const { channelName, chaincodeName } = req.params;
+    const { fcn, args, transient } = req.body;
+
+    console.log(`Received request body: ${JSON.stringify(req.body)}`);
+    console.log(`chaincode name is :${chaincodeName}`);
+    console.log(`channelName : ${channelName}`);
+    console.log(`chaincodeName : ${chaincodeName}`);
+    console.log(`fcn : ${fcn}`);
+    console.log(`args : ${args}`);
+    console.log(`transient : ${transient}`);
+
+    if (!chaincodeName) {
+        res.json(getErrorMessage('\'chaincodeName\''));
+        return;
+    }
+    if (!channelName) {
+        res.json(getErrorMessage('\'channelName\''));
+        return;
+    }
+    if (!fcn) {
+        res.json(getErrorMessage('\'fcn\''));
+        return;
+    }
+    if (!args) {
+        res.json(getErrorMessage('\'args\''));
+        return;
+    }
+
     try {
-        logger.debug('==================== INVOKE ON CHAINCODE ==================');
-        var peers = req.body.peers;
-        var chaincodeName = req.params.chaincodeName;
-        var channelName = req.params.channelName;
-        var fcn = req.body.fcn;
-        var args = req.body.args;
-        var transient = req.body.transient;
-        console.log(`Transient data is ;${transient}`)
-        logger.debug('channelName  : ' + channelName);
-        logger.debug('chaincodeName : ' + chaincodeName);
-        logger.debug('fcn  : ' + fcn);
-        logger.debug('args  : ' + args);
-        if (!chaincodeName) {
-            res.json(getErrorMessage('\'chaincodeName\''));
-            return;
-        }
-        if (!channelName) {
-            res.json(getErrorMessage('\'channelName\''));
-            return;
-        }
-        if (!fcn) {
-            res.json(getErrorMessage('\'fcn\''));
-            return;
-        }
-        if (!args) {
-            res.json(getErrorMessage('\'args\''));
-            return;
-        }
-
         let message = await invoke.invokeTransaction(channelName, chaincodeName, fcn, args, req.username, req.orgname, transient);
-        console.log(`message result is : ${message}`)
+        console.log(`message result is : ${message}`);
 
         const response_payload = {
-            result: message,
-            error: null,
-            errorData: null
-        }
-        res.send(response_payload);
+            message: message
+        };
 
+        res.status(200).json(response_payload);
     } catch (error) {
-        const response_payload = {
-            result: null,
-            error: error.name,
-            errorData: error.message
-        }
-        res.send(response_payload)
+        console.error(`Error invoking transaction: ${error}`);
+        res.status(500).json({ error: error.toString() });
     }
 });
 
@@ -170,9 +164,9 @@ app.get('/channels/:channelName/chaincodes/:chaincodeName', async function (req,
         var channelName = req.params.channelName;
         var chaincodeName = req.params.chaincodeName;
         console.log(`chaincode name is :${chaincodeName}`)
-        let args = req.query.args;
-        let fcn = req.query.fcn;
-        let peer = req.query.peer;
+        let args = req.params.args;
+        let fcn = req.params.fcn;
+        let peer = req.params.peer;
 
         logger.debug('channelName : ' + channelName);
         logger.debug('chaincodeName : ' + chaincodeName);

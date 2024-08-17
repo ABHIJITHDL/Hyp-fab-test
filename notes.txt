@@ -111,3 +111,20 @@ cd /var/hyperledger/production/
 cd ledgersData/chains/chains/
 cd mychannel
 ls
+
+##Logs of docker containers
+  docker logs orderer2.example.com
+  see full details:
+  docker logs orderer2.example.com -f
+
+https://thesecretlivesofdata.com/raft/
+
+##to run app-2.0
+  nvm install 16
+  nvm use 16
+  npm install
+
+##View certificate, open folder in terminal
+   openssl x509 -in orderer.example.com-cert.pem --text
+
+docker-compose -f docker-compose-persistance.yaml up -d
