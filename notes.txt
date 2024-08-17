@@ -127,4 +127,6 @@ https://thesecretlivesofdata.com/raft/
 ##View certificate, open folder in terminal
    openssl x509 -in orderer.example.com-cert.pem --text
 
-docker-compose -f docker-compose-persistance.yaml up -d
+##persistance containers
+  docker-compose -f docker-compose-persistance.yaml up -d
+  docker-compose -f docker-compose-persistance.yaml down -v  // to clear all data
