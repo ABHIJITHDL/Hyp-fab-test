@@ -92,7 +92,7 @@ CORE_PEER_LOCALMSPID=Org1MSP or CORE_PEER_LOCALMSPID="Org1MSP"
 
 ##Deleting docker volumes not attatched to the current containers
   docker volume ls
-  docker volume prune
+docker volume prune
 
 ##for version conflicts of package.json
 npm install -g npm-check-updates
@@ -130,5 +130,4 @@ https://thesecretlivesofdata.com/raft/
 ##persistance containers
   docker-compose -f docker-compose-persistance.yaml up -d
   docker-compose -f docker-compose-persistance.yaml down -v  // to clear all data
-
 
