@@ -426,7 +426,7 @@ createCretificateForOrderer() {
 # createCretificateForOrderer
 
 sudo rm -rf crypto-config-ca/*
-# sudo rm -rf fabric-ca/*
+sudo rm -rf fabric-ca/*
 createcertificatesForOrg1
 createCertificateForOrg2
 createCretificateForOrderer
