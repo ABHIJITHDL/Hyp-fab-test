@@ -56,9 +56,9 @@ presetup(){
 
 CHANNEL_NAME="mychannel"
 CC_RUNTIME_LANGUAGE="golang"
-VERSION="1"
+VERSION="0.0.3"
 CC_SRC_PATH="./artifacts/src/github.com/fabcar/go"
-CC_NAME="fabcar"
+CC_NAME="test1"
 
 packageChaincode(){
     rm -rf ${CC_NAME}.tar.gz
@@ -204,7 +204,7 @@ chaincodeQuery(){
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["queryAllCars"]}'
 
     # Query Car by Id
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "queryCar","Args":["CAR0"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createPermission","Args":["P01","D01","EHR01"]}'
     #'{"Args":["GetSampleData","Key1"]}'
 }
 #presetup

@@ -8,6 +8,7 @@ lerna-debug.log*
 
 Hyperledger/fabric-samples
 Ehr_Nodejs/node_modules
+test
 
 api-2.0/IssuerPublicKey
 api-2.0/IssuerRevocationPublicKey

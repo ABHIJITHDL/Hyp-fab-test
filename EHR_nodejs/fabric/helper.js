@@ -2,6 +2,7 @@ const { Wallets } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const fs = require('fs');
+const { getWalletPath } = require('../../api-2.0/app/helper');
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -58,6 +59,10 @@ async function enrollAdmin(userOrg, walletPath) {
     } catch (error) {
         console.error(error);
     }
+}
+
+function getWalletPathByOrg(userOrg){
+    return path.join(__dirname, '..', 'connection-profiles', userOrg, 'wallet');
 }
 
 async function registerUser(username, userOrg) {
@@ -148,4 +153,4 @@ async function removeUser(username, userOrg) {
     }
 }
 
-registerUser('user1', 'org1');
+module.exports = {getCCP,getCaUrl,registerUser,getWalletPathByOrg}
