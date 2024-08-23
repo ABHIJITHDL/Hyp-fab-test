@@ -7,7 +7,7 @@ export FABRIC_CFG_PATH=${PWD}/artifacts/channel/config/
 export CHANNEL_NAME=mychannel
 
 setGlobalsForOrderer(){
-    export CORE_PEER_LOCALMSPID="OrdererMSP"
+    export CORE_PEER_LOCALMSPID=OrdererMSP
     export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/artifacts/channel/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
     export CORE_PEER_MSPCONFIGPATH=${PWD}/artifacts/channel/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp
     
@@ -30,7 +30,7 @@ setGlobalsForPeer1Org1(){
 }
 
 setGlobalsForPeer0Org2(){
-    export CORE_PEER_LOCALMSPID="Org2MSP"
+    export CORE_PEER_LOCALMSPID=Org2MSP
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/artifacts/channel/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
     export CORE_PEER_ADDRESS=localhost:9051
@@ -38,7 +38,7 @@ setGlobalsForPeer0Org2(){
 }
 
 setGlobalsForPeer1Org2(){
-    export CORE_PEER_LOCALMSPID="Org2MSP"
+    export CORE_PEER_LOCALMSPID=Org2MSP
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/artifacts/channel/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
     export CORE_PEER_ADDRESS=localhost:10051
@@ -56,9 +56,9 @@ presetup(){
 
 CHANNEL_NAME="mychannel"
 CC_RUNTIME_LANGUAGE="golang"
-VERSION="0.0.3"
+VERSION="1"
 CC_SRC_PATH="./artifacts/src/github.com/fabcar/go"
-CC_NAME="test1"
+CC_NAME="asset"
 
 packageChaincode(){
     rm -rf ${CC_NAME}.tar.gz
@@ -158,19 +158,19 @@ queryCommitted(){
 
 chaincodeInvokeInit(){
     setGlobalsForPeer0Org1
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":[]}'
-    
+    #peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":[]}'
+    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["createMyAsset", "assetIdValue", "assetValue"]}'
 }
 
 # chaincodeInvokeInit
 
 chaincodeInvoke(){
-    # setGlobalsForPeer0Org1
+     setGlobalsForPeer0Org1
     peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
     --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
     --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
     --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-    -c '{"function":"initLedger","Args":[]}'
+    -c '{"function":"createMyAsset","Args":["1","test"]}'
     
     setGlobalsForPeer0Org1
 
@@ -186,39 +186,47 @@ chaincodeInvoke(){
     #     -c '{"function": "CreateCar","Args":["Car-ABCDEEE", "Audi", "R8", "Red", "Pavan"]}'
     
     ## Change car owner
-    peer chaincode invoke -o localhost:7050 \
-        --ordererTLSHostnameOverride orderer.example.com \
-        --tls $CORE_PEER_TLS_ENABLED \
-        --cafile $ORDERER_CA \
-        -C $CHANNEL_NAME -n ${CC_NAME}  \
-        --peerAddresses localhost:7051 \
-        --tlsRootCertFiles $PEER0_ORG1_CA \
-        --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA $PEER_CONN_PARMS  \
-        -c '{"function": "initLedger","Args":[]}'
+    # peer chaincode invoke -o localhost:7050 \
+    #     --ordererTLSHostnameOverride orderer.example.com \
+    #     --tls $CORE_PEER_TLS_ENABLED \
+    #     --cafile $ORDERER_CA \
+    #     -C $CHANNEL_NAME -n ${CC_NAME}  \
+    #     --peerAddresses localhost:7051 \
+    #     --tlsRootCertFiles $PEER0_ORG1_CA \
+    #     --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA $PEER_CONN_PARMS  \
+    #     -c '{"function": "initLedger","Args":[]}'
 }
 
 chaincodeQuery(){
-    setGlobalsForPeer1Org1
+    setGlobalsForPeer0Org2
 
     # Query all cars
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["queryAllCars"]}'
 
-    # Query Car by Id
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createPermission","Args":["P01","D01","EHR01"]}'
+    # # Query Car by Id
+    # peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls true --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA -c '{"function": "createMyAsset","Args":["ID","TEST"]}'
+
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createMyAsset","Args":["ID2","TEST2"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "readMyAsset","Args":["ID"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "myAssetExists","Args":["ID"]}'
+    # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["createMyAsset","ID","Test"]}'
+    # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["readMyAsset","ID"]}'
     #'{"Args":["GetSampleData","Key1"]}'
 }
+
+
 #presetup
 # packageChaincode
-installChaincode
-queryInstalled
-approveForMyOrg1
-checkCommitReadyness
-approveForMyOrg2
-checkCommitReadyness
-commitChaincodeDefination
-queryCommitted
-chaincodeInvokeInit
-sleep 5
-chaincodeInvoke
-sleep 3
+# installChaincode
+# queryInstalled
+# approveForMyOrg1
+# checkCommitReadyness
+# approveForMyOrg2
+# checkCommitReadyness
+# commitChaincodeDefination
+# queryCommitted
+# chaincodeInvokeInit
+# sleep 5
+# chaincodeInvoke
+# sleep 3
 chaincodeQuery
