@@ -58,7 +58,8 @@ CHANNEL_NAME="mychannel"
 CC_RUNTIME_LANGUAGE="golang"
 VERSION="1"
 CC_SRC_PATH="./artifacts/src/github.com/fabcar/go"
-CC_NAME="asset"
+CC_NAME="ehr"
+SEQUENCE="1"
 
 packageChaincode(){
     rm -rf ${CC_NAME}.tar.gz
@@ -102,7 +103,7 @@ approveForMyOrg1(){
     peer lifecycle chaincode approveformyorg -o localhost:7050  \
     --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED \
     --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --version ${VERSION} \
-    --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION}
+    --init-required --package-id ${PACKAGE_ID} --sequence ${SEQUENCE}
 
     echo "===================== chaincode approved from org 1 ===================== "
     
@@ -119,7 +120,7 @@ checkCommitReadyness(){
     setGlobalsForPeer0Org1
     peer lifecycle chaincode checkcommitreadiness \
     --channelID $CHANNEL_NAME --name ${CC_NAME} --version ${VERSION} \
-    --sequence ${VERSION} --output json --init-required
+    --sequence ${SEQUENCE} --output json --init-required
     echo "===================== checking commit readyness from org 1 ===================== "
 }
 
@@ -130,7 +131,7 @@ approveForMyOrg2(){
     --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED \
     --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} \
     --version ${VERSION} --init-required --package-id ${PACKAGE_ID} \
-    --sequence ${VERSION}
+    --sequence ${SEQUENCE}
 
     echo "===================== chaincode approved from org 2 ===================== "
 }
@@ -138,14 +139,14 @@ approveForMyOrg2(){
 checkCommitReadyness(){
     
     setGlobalsForPeer0Org1
-    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --name ${CC_NAME} --version ${VERSION} --sequence ${VERSION} --output json --init-required
+    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --name ${CC_NAME} --version ${VERSION} --sequence ${SEQUENCE} --output json --init-required
     echo "===================== checking commit readyness from org 1 ===================== "
 }
 
 commitChaincodeDefination(){
     setGlobalsForPeer0Org1
     #set -x  ## Turn on debugging mode
-    peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED  --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --version ${VERSION} --sequence ${VERSION} --init-required
+    peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED  --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --version ${VERSION} --sequence ${SEQUENCE} --init-required
     #set +x  ## Turn off debugging mode
    
 }
@@ -159,7 +160,7 @@ queryCommitted(){
 chaincodeInvokeInit(){
     setGlobalsForPeer0Org1
     #peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":[]}'
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["createMyAsset", "assetIdValue", "assetValue"]}'
+    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["createEHRRecord","ehr01", "D01", "P01", "hash111"]}'
 }
 
 # chaincodeInvokeInit
@@ -170,7 +171,7 @@ chaincodeInvoke(){
     --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
     --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
     --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-    -c '{"function":"createMyAsset","Args":["1","test"]}'
+    -c '{"function": "createEHRRecord","Args": ["ehr01", "D01", "P01", "hash111"]}'
     
     setGlobalsForPeer0Org1
 
@@ -206,9 +207,10 @@ chaincodeQuery(){
     # # Query Car by Id
     # peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls true --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA -c '{"function": "createMyAsset","Args":["ID","TEST"]}'
 
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createMyAsset","Args":["ID2","TEST2"]}'
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "readMyAsset","Args":["ID"]}'
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "myAssetExists","Args":["ID"]}'
+    # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createMyAsset","Args":["ID2","TEST2"]}'
+    # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "readMyAsset","Args":["ID"]}'
+    # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "myAssetExists","Args":["ID"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "getEHRRecord","Args": ["ehr01","P01"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["createMyAsset","ID","Test"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["readMyAsset","ID"]}'
     #'{"Args":["GetSampleData","Key1"]}'

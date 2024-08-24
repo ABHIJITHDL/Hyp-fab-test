@@ -153,4 +153,5 @@ async function removeUser(username, userOrg) {
     }
 }
 
+registerUser('user1','org1')
 module.exports = {getCCP,getCaUrl,registerUser,getWalletPathByOrg}
