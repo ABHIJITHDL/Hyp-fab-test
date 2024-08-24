@@ -140,4 +140,7 @@ crypto/fabric-client-kv-org1
 artifacts/src/github.com/fabcar_contract_api/go/vendor
 artifacts/src/github.com/fabcar_contract_api/go/go.sum
 
-EHR_nodejs/connection-profiles/org1/wallet/*
+EHR_nodejs/connection-profiles/org1/wallet*
+EHR_nodejs/connection-profiles/org1/connection-org1.json
+EHR_nodejs/connection-profiles/org2/wallet/*
+EHR_nodejs/connection-profiles/org2/connection-org2.json

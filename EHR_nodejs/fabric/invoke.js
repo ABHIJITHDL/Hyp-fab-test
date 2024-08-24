@@ -27,11 +27,19 @@ async function invokeTransaction(channelName,chaincodeName,fcn,args,username,use
         result = await contract.submitTransaction(fcn,args[0], args[1], args[2], args[3], args[4]);
         message = `created car asset with key ${args[0]}`;
     }
-
+    if(fcn === "getEHRRecord"){
+        result = await contract.evaluateTransaction(fcn,args[0],args[1]);
+        message = `fetched EHR record with key ${args[0]}  and result is ${result}`;
+        console.log(message);
+    }
     console.log(`Wallet path ${walletPath}`);
     }catch(err){
         console.error(`Failed to submit transaction ${err}`)
     }
 }
 
-invokeTransaction("mychannel","fabcar","createCar",["test1","AUDI111","F1-Reloaded","White","Pulkit"],"user1","org1");
+async function test(){
+await invokeTransaction("mychannel","ehr","getEHRRecord",["ehr01","P01"],"user1","org1");
+}
+
+test();
