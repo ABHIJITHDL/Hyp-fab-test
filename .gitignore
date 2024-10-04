@@ -1,5 +1,6 @@
 # Logs
 .idea/
+EHR/target/
 logs
 *.log
 npm-debug.log*
