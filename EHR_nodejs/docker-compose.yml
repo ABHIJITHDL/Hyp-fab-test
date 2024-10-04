@@ -1,0 +1,10 @@
+services:
+  ehr_nodejs:
+    build: .
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+networks:
+  backend:

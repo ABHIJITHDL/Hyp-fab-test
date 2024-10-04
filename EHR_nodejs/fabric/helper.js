@@ -2,7 +2,6 @@ const { Wallets } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const fs = require('fs');
-const { getWalletPath } = require('../../api-2.0/app/helper');
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -153,5 +152,6 @@ async function removeUser(username, userOrg) {
     }
 }
 
-registerUser('user1','org1')
+registerUser('user1','org2');
+
 module.exports = {getCCP,getCaUrl,registerUser,getWalletPathByOrg}

@@ -23,23 +23,20 @@ async function invokeTransaction(channelName,chaincodeName,fcn,args,username,use
 
     let result;
     let message;
-    if(fcn === "createCar"){
-        result = await contract.submitTransaction(fcn,args[0], args[1], args[2], args[3], args[4]);
-        message = `created car asset with key ${args[0]}`;
-    }
+        
     if(fcn === "getEHRRecord"){
         result = await contract.evaluateTransaction(fcn,args[0],args[1]);
         message = `fetched EHR record with key ${args[0]}  and result is ${result}`;
         console.log(message);
+    }else{
+        result = await contract.submitTransaction(fcn,args[0], args[1], args[2], args[3], args[4]);
+        message = `invoked transaction with ${args[0]}`;
+        console.log(message);
     }
-    console.log(`Wallet path ${walletPath}`);
+    return result.toString();
     }catch(err){
         console.error(`Failed to submit transaction ${err}`)
     }
 }
 
-async function test(){
-await invokeTransaction("mychannel","ehr","getEHRRecord",["ehr01","P01"],"user1","org1");
-}
-
-test();
+module.exports = {invokeTransaction}

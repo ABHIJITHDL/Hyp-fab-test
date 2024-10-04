@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "ehrExists",
+        "transactionLabel": "A test ehrExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createEhr",
+        "transactionLabel": "A test createEhr transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readEhr",
+        "transactionLabel": "A test readEhr transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateEhr",
+        "transactionLabel": "A test updateEhr transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteEhr",
+        "transactionLabel": "A test deleteEhr transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
