@@ -24,8 +24,8 @@ public class FabricConfig {
     @Bean
     public Gateway fabricGateway() throws Exception {
         // Paths to the certificate and private key
-        Path certPath = Paths.get("D:/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/user2/msp/signcerts/cert.pem");
-        Path keyPath = Paths.get("D:/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/user2/msp/keystore/priv_sk");
+        Path certPath = Paths.get("D:\\Applicaitons\\BasicNetwork-2.0\\Ehr_Nodejs\\connection-profiles\\org1\\wallet\\user7-cert.pem");
+        Path keyPath = Paths.get("D:\\Applicaitons\\BasicNetwork-2.0\\Ehr_Nodejs\\connection-profiles\\org1\\wallet\\user7-priv-key.pem");
         Path tlsCertPath = Paths.get("D:/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem");
 
         // Read certificate
