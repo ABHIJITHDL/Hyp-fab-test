@@ -1,6 +1,9 @@
 package com.blockchain.EHR.services;
 
-import org.hyperledger.fabric.client.*;
+import org.hyperledger.fabric.client.Contract;
+import org.hyperledger.fabric.client.Gateway;
+import org.hyperledger.fabric.client.Network;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +14,7 @@ public class FabricService {
 
     private final Gateway gateway;
 
+    @Autowired
     public FabricService(Gateway gateway) {
         this.gateway = gateway;
     }
@@ -30,4 +34,6 @@ public class FabricService {
         System.out.println(Arrays.toString(result));
         return new String(result, StandardCharsets.UTF_8);
     }
+
+
 }

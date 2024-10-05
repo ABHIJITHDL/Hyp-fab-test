@@ -3,8 +3,12 @@ package com.blockchain.EHR.config;
 
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
+import io.grpc.ManagedChannel;
+import io.grpc.TlsChannelCredentials;
+import org.hyperledger.fabric.client.Gateway;
+import org.hyperledger.fabric.client.identity.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,13 +16,7 @@ import java.nio.file.Paths;
 import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-
-import org.hyperledger.fabric.client.*;
-import org.hyperledger.fabric.client.identity.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import io.grpc.ManagedChannel;
-import io.grpc.TlsChannelCredentials;
+import java.util.Properties;
 
 @Configuration
 public class FabricConfig {
