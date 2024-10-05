@@ -132,3 +132,15 @@ https://thesecretlivesofdata.com/raft/
   docker-compose -f docker-compose-persistance.yaml down -v  // to clear all data
 
 
+#To add user from cli
+ sudo nano /etc/hosts
+ 127.0.0.1 tlsca.org1.example.com
+
+abhi@DESKTOP-2GTJ186:/mnt/d/Applicaitons/BasicNetwork-2.0$ fabric-ca-client enroll -u https://admin:adminpw@tlsca.org1.example.com:7054 --caname ca.org1.example.com --tls.certfiles /mnt/d/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+Resgister new user
+abhi@DESKTOP-2GTJ186:/mnt/d/Applicaitons/BasicNetwork-2.0$ fabric-ca-client register --id.name user2 --id.secret user2pw --id.type client --tls.certfiles /mnt/d/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem -u https://tlsca.org1.example.com
+
+Enroll new user
+abhi@DESKTOP-2GTJ186:/mnt/d/Applicaitons/BasicNetwork-2.0$ fabric-ca-client enroll -u https://user2:user2pw@tlsca.org1.example.com:7054 --caname ca.org1.example.com 
+--tls.certfiles /mnt/d/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem -M /mnt/d/Applicaitons/BasicNetwork-2.0/artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/user2/msp

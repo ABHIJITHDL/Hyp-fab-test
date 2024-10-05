@@ -1,6 +1,10 @@
 # Logs
 .idea/
+.vscode/
+
 EHR/target/
+tlsca.org1.example.com-cert.der
+
 logs
 *.log
 npm-debug.log*
