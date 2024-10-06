@@ -1,19 +1,22 @@
 package com.blockchain.EHR.services;
 
+import org.apache.http.HttpStatus;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 import org.hyperledger.fabric.sdk.User;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.nio.file.Paths;
-import java.security.Security;
+import java.security.PrivateKey;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Base64;
 
 public class FabricUserRegistration {
 
@@ -43,14 +46,38 @@ public class FabricUserRegistration {
             User admin = new FabricUser(ADMIN_NAME, ORG_NAME, adminEnrollment);
 
             // Step 3: Register and enroll the new user
-            String username = "user9";
-            String password = "user9pw";
+            String username = "user11";
+            String password = "user11pw";
             registerAndEnrollUser(caClient, admin, username, password);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public static boolean authenticateUser(String username, String password) {
+        try {
+            // Step 1: Create the CA client
+            Properties props = new Properties();
+            props.put("pemFile", CA_CERT_PATH); // Path to CA certificate
+            props.put("allowAllHostNames", "true"); // Optional for dev environments
+
+            HFCAClient caClient = HFCAClient.createNewInstance(CA_URL, props);
+            caClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
+
+            // Step 2: Try enrolling the user with the provided username and password
+            Enrollment enrollment = caClient.enroll(username, password);
+
+            // If enrollment succeeds, credentials are valid
+            System.out.println("User authenticated successfully: " + username);
+            return true;
+        } catch (Exception e) {
+            // If an exception occurs, it means authentication failed
+            System.out.println("Authentication failed for user: " + username);
+            return false;
+        }
+    }
+
 
     private static void registerAndEnrollUser(HFCAClient caClient, User admin, String username, String password) throws Exception {
         // Step 1: Register the user with the CA
@@ -64,15 +91,14 @@ public class FabricUserRegistration {
         Enrollment userEnrollment = caClient.enroll(username, enrollmentSecret);
         System.out.println("Successfully enrolled user: " + username);
 
-        // Save the user’s private key and certificate
+        // Save the user's private key and certificate
         saveUserCredentials(username, userEnrollment);
     }
 
     private static void saveUserCredentials(String username, Enrollment enrollment) throws Exception {
-        // Save the user's certificate and private key to a directory for future use
         File walletDir = new File(WALLET_PATH);
         if (!walletDir.exists()) {
-            walletDir.mkdirs(); // Use mkdirs() to create parent directories if needed
+            walletDir.mkdirs();
         }
 
         File certFile = Paths.get(WALLET_PATH, username + "-cert.pem").toFile();
@@ -82,12 +108,12 @@ public class FabricUserRegistration {
         java.nio.file.Files.write(certFile.toPath(), enrollment.getCert().getBytes());
 
         // Write the private key to the file in PEM format
-        try (JcaPEMWriter pemWriter = new JcaPEMWriter(new FileWriter(keyFile))) {
-            PrivateKeyInfo privateKeyInfo = PrivateKeyInfo.getInstance(enrollment.getKey().getEncoded());
-            pemWriter.writeObject(privateKeyInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
+        try (PemWriter pemWriter = new PemWriter(new FileWriter(keyFile))) {
+            PemObject pemObject = new PemObject("PRIVATE KEY", enrollment.getKey().getEncoded());
+            pemWriter.writeObject(pemObject);
         }
+
+        System.out.println("Saved credentials for user: " + username);
     }
 
     // Simple implementation of the User interface for Fabric SDK

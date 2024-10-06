@@ -2,7 +2,10 @@ package com.blockchain.EHR.controller;
 
 import com.blockchain.EHR.services.FabricCAService;
 import com.blockchain.EHR.services.FabricService;
+import com.blockchain.EHR.services.FabricUserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +19,15 @@ public class FabricController {
     public FabricController(FabricService fabricService,FabricCAService fabricCAService) {
         this.fabricService = fabricService;
         this.fabricCAService=fabricCAService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+        if (FabricUserRegistration.authenticateUser(username, password)) {
+            return ResponseEntity.ok("Authentication successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+        }
     }
 
     @PostMapping("/submit")

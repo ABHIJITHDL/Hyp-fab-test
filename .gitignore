@@ -1,6 +1,7 @@
 # Logs
 .idea/
 .vscode/
+EHR/src/main/resources/static/wallet/*
 
 EHR/target/
 tlsca.org1.example.com-cert.der
