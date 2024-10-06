@@ -23,7 +23,6 @@ public class FabricService {
         Network network = gateway.getNetwork(channelName);
         Contract contract = network.getContract(chaincodeName);
         byte[] result = contract.submitTransaction(functionName, args);
-        System.out.println(Arrays.toString(result));
         return new String(result, StandardCharsets.UTF_8);
     }
 
@@ -31,7 +30,6 @@ public class FabricService {
         Network network = gateway.getNetwork(channelName);
         Contract contract = network.getContract(chaincodeName);
         byte[] result = contract.evaluateTransaction(functionName, args);
-        System.out.println(Arrays.toString(result));
         return new String(result, StandardCharsets.UTF_8);
     }
 
