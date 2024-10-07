@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 public class FabricController {
 
     private final FabricService fabricService;
-
     private final FabricCAService fabricCAService;
+    private final FabricUserRegistration fabricUserRegistration;
 
-    public FabricController(FabricService fabricService,FabricCAService fabricCAService) {
+    @Autowired
+    public FabricController(FabricService fabricService, FabricCAService fabricCAService, FabricUserRegistration fabricUserRegistration) {
         this.fabricService = fabricService;
-        this.fabricCAService=fabricCAService;
+        this.fabricCAService = fabricCAService;
+        this.fabricUserRegistration = fabricUserRegistration;
     }
 
     @PostMapping("/login")
@@ -49,19 +51,13 @@ public class FabricController {
 
     @PostMapping("/enrollAdmin")
     public String enrollAdmin() {
-        fabricCAService.enrollAdmin();
         return "Admin enrolled successfully";
     }
 
-    @PostMapping("/register")
-    public String registerUser(@RequestParam String username, @RequestParam String password) {
-        fabricCAService.registerUser(username, password);
-        return "User registered successfully";
-    }
 
-    @PostMapping("/enroll")
+    @PostMapping("/register")
     public String enrollUser(@RequestParam String username, @RequestParam String password) {
-        fabricCAService.enrollUser(username, password);
+        FabricUserRegistration.addUser(username, password);
         return "User enrolled successfully";
     }
 }

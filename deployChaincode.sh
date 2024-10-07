@@ -219,17 +219,17 @@ chaincodeQuery(){
 
 #presetup
 # packageChaincode
-# installChaincode
-# queryInstalled
-# approveForMyOrg1
-# checkCommitReadyness
-# approveForMyOrg2
-# checkCommitReadyness
-# commitChaincodeDefination
-# queryCommitted
-# sleep 3
-# chaincodeInvokeInit
+installChaincode
+queryInstalled
+approveForMyOrg1
+checkCommitReadyness
+approveForMyOrg2
+checkCommitReadyness
+commitChaincodeDefination
+queryCommitted
+sleep 3
+chaincodeInvokeInit
 # sleep 5
 # chaincodeInvoke
 # sleep 3
-chaincodeQuery
+# chaincodeQuery

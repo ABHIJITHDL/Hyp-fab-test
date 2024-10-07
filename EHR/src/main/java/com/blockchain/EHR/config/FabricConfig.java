@@ -43,8 +43,8 @@ public class FabricConfig {
         String tlsCertPem = connectionProfile.path("peers").path("peer0.org1.example.com").path("tlsCACerts").path("pem").asText();
 
         // Paths to the certificate and private key
-        Path certPath = Paths.get("artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/user2/msp/signcerts/cert.pem");
-        Path keyPath = Paths.get("artifacts/channel/crypto-config/peerOrganizations/org1.example.com/users/user2/msp/keystore/priv_sk");
+        Path certPath = Paths.get("EHR/src/main/resources/static/wallet/user1-cert.pem");
+        Path keyPath = Paths.get("EHR/src/main/resources/static/wallet/user1-priv-key.pem");
 
         // Write the TLS certificate to a temporary file
         Path tlsCertPath = Files.createTempFile("tlsCert", ".pem");
