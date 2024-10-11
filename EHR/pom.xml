@@ -40,6 +40,11 @@
 			<version>6.1.13</version>
 		</dependency>
 		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty</artifactId>
+			<version>1.68.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
@@ -55,16 +60,6 @@
 			<version>1.6.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents.client5</groupId>
-			<artifactId>httpclient5</artifactId>
-			<version>5.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents.core5</groupId>
-			<artifactId>httpcore5</artifactId>
-			<version>5.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.hyperledger.fabric-sdk-java</groupId>
 			<artifactId>fabric-sdk-java</artifactId>
 			<version>2.2.26</version>
@@ -74,6 +69,16 @@
 			<artifactId>grpc-netty-shaded</artifactId>
 			<version>1.68.0</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.70</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.70</version>
 		</dependency>
 	</dependencies>
 

@@ -1,25 +1,22 @@
 package com.blockchain.EHR.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 
 import io.grpc.TlsChannelCredentials;
 import org.hyperledger.fabric.client.Gateway;
-import org.hyperledger.fabric.client.identity.Identity;
-import org.hyperledger.fabric.client.identity.X509Identity;
-import org.hyperledger.fabric.client.identity.Identities;
+import org.hyperledger.fabric.client.identity.*;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,8 +24,12 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import static com.blockchain.EHR.config.FabricConfig.readX509CertificateFromPem;
 
 @Service
 public class FabricUserRegistration {
@@ -42,9 +43,9 @@ public class FabricUserRegistration {
     private static final String CA_CERT_PATH = Paths.get("artifacts", "channel", "crypto-config", "peerOrganizations", "org1.example.com", "tlsca", "tlsca.org1.example.com-cert.pem").toString();
 
     // Directory where user certificates and keys will be stored
-    private static final String WALLET_PATH = Paths.get("EHR", "src", "main", "resources", "static", "wallet").toString();
+    private static final String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/org1/wallet";
 
-    public static void addUser(String username, String password) {
+    public boolean addUser(String username, String password) {
         try {
             // Step 1: Create a CA client for interacting with the CA
             Properties props = new Properties();
@@ -61,9 +62,10 @@ public class FabricUserRegistration {
             // Step 3: Register and enroll the new user
 
             registerAndEnrollUser(caClient, admin, username, password);
-
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.getMessage();
+            return false;
         }
     }
 
@@ -102,26 +104,40 @@ public class FabricUserRegistration {
         System.out.println("Successfully enrolled user: " + username);
 
         // Save the user's private key and certificate
-        saveUserCredentials(username, userEnrollment);
+
+        saveUserCredentials(username, userEnrollment, "Org1MSP");
+
     }
 
-    private static void saveUserCredentials(String username, Enrollment enrollment) throws Exception {
+    private static void saveUserCredentials(String username, Enrollment enrollment, String mspId) throws Exception {
+        // Define the wallet directory
         File walletDir = new File(WALLET_PATH);
         if (!walletDir.exists()) {
             walletDir.mkdirs();
         }
 
-        File certFile = Paths.get(WALLET_PATH, username + "-cert.pem").toFile();
-        File keyFile = Paths.get(WALLET_PATH, username + "-priv-key.pem").toFile();
+        // Construct the path for the user's JSON wallet entry
+        File walletFile = Paths.get(WALLET_PATH, username + ".id").toFile();
 
-        // Write the certificate to the file
-        Files.write(certFile.toPath(), enrollment.getCert().getBytes());
+        // Convert the private key to PEM format (already PEM encoded)
+        String privateKeyPem = Identities.toPemString(enrollment.getKey());
 
-        // Write the private key to the file in PEM format
-        try (PemWriter pemWriter = new PemWriter(new FileWriter(keyFile))) {
-            PemObject pemObject = new PemObject("PRIVATE KEY", enrollment.getKey().getEncoded());
-            pemWriter.writeObject(pemObject);
-        }
+        // Convert the certificate to PEM format
+        String certificatePem = enrollment.getCert();
+
+        // Construct the wallet JSON entry for the user
+        Map<String, Object> walletJson = new HashMap<>();
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("certificate", certificatePem);
+        credentials.put("privateKey", privateKeyPem);
+
+        walletJson.put("credentials", credentials);
+        walletJson.put("mspId", mspId); // Set the MSP ID
+        walletJson.put("type", "X.509");
+
+        // Use Jackson ObjectMapper to serialize the JSON data
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(walletFile, walletJson);
 
         System.out.println("Saved credentials for user: " + username);
     }
@@ -220,16 +236,61 @@ public class FabricUserRegistration {
                 .connect();
     }
 
-    private X509Certificate readX509Certificate(Path certificatePath) throws Exception {
-        try (var certInputStream = Files.newInputStream(certificatePath)) {
-            return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(certInputStream);
+    private static X509Certificate readX509CertificateFromPem(String pem) throws Exception {
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        try (var certStream = new java.io.ByteArrayInputStream(pem.getBytes())) {
+            return (X509Certificate) factory.generateCertificate(certStream);
         }
     }
 
-    private PrivateKey getPrivateKey(Path privateKeyPath) throws Exception {
-        try (var keyInputStream = Files.newInputStream(privateKeyPath)) {
-            return Identities.readPrivateKey(new String(keyInputStream.readAllBytes()));
+    // Utility method to read PrivateKey from PEM string
+    private static PrivateKey readPrivateKeyFromPem(String pem) throws Exception {
+        return Identities.readPrivateKey(pem);  // Use existing method in Identities
+    }
+
+    // Load user identity and private key from JSON wallet
+    public static UserCredentials loadUserIdentity(String walletPath, String username) throws Exception {
+        // Path to the user's JSON wallet entry
+        Path userFilePath = Paths.get(walletPath, username + ".id");
+
+        // Read the user credentials from the JSON file
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode userCredentials = mapper.readTree(userFilePath.toFile());
+
+        // Extract certificate and private key from the JSON content
+        String certificatePem = userCredentials.path("credentials").path("certificate").asText();
+        String privateKeyPem = userCredentials.path("credentials").path("privateKey").asText();
+
+        // Convert PEM to X509 certificate and private key
+        X509Certificate certificate = readX509CertificateFromPem(certificatePem);
+        PrivateKey privateKey = readPrivateKeyFromPem(privateKeyPem);
+
+        // Manually create X509Identity and return private key separately
+        X509Identity identity = new X509Identity("Org1MSP", certificate);  // Replace "Org1MSP" with actual MSP ID
+        return new UserCredentials(identity, privateKey);
+    }
+
+    // A class to hold both identity and private key
+    public static class UserCredentials {
+        private final X509Identity identity;
+        private final PrivateKey privateKey;
+
+        public UserCredentials(X509Identity identity, PrivateKey privateKey) {
+            this.identity = identity;
+            this.privateKey = privateKey;
         }
+
+        public X509Identity getIdentity() {
+            return identity;
+        }
+
+        public PrivateKey getPrivateKey() {
+            return privateKey;
+        }
+    }
+
+    public static Signer createSigner(PrivateKey privateKey) throws Exception {
+        return Signers.newPrivateKeySigner(privateKey);
     }
 
     // Simple implementation of the User interface for Fabric SDK

@@ -1,6 +1,5 @@
 package com.blockchain.EHR.controller;
 
-import com.blockchain.EHR.services.FabricCAService;
 import com.blockchain.EHR.services.FabricService;
 import com.blockchain.EHR.services.FabricUserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class FabricController {
 
     private final FabricService fabricService;
-    private final FabricCAService fabricCAService;
     private final FabricUserRegistration fabricUserRegistration;
 
     @Autowired
-    public FabricController(FabricService fabricService, FabricCAService fabricCAService, FabricUserRegistration fabricUserRegistration) {
+    public FabricController(FabricService fabricService, FabricUserRegistration fabricUserRegistration) {
         this.fabricService = fabricService;
-        this.fabricCAService = fabricCAService;
         this.fabricUserRegistration = fabricUserRegistration;
     }
 
@@ -36,16 +33,16 @@ public class FabricController {
     public String submitTransaction(@RequestParam String channelName,
                                     @RequestParam String chaincodeName,
                                     @RequestParam String functionName,
-                                    @RequestParam String... args) throws Exception {
-        return fabricService.submitTransaction(channelName, chaincodeName, functionName, args);
+                                    @RequestParam String username, @RequestParam String... args){
+        return fabricService.submitTransaction(channelName, chaincodeName, functionName, args,username);
     }
 
     @GetMapping("/query")
     public String queryTransaction(@RequestParam String channelName,
-                                   @RequestParam String chaincodeName,
-                                   @RequestParam String functionName,
-                                   @RequestParam String... args) throws Exception {
-        return fabricService.evaluateTransaction(channelName, chaincodeName, functionName, args);
+                                    @RequestParam String chaincodeName,
+                                    @RequestParam String functionName,
+                                    @RequestParam String username, @RequestParam String... args){
+        return fabricService.evaluateTransaction(channelName, chaincodeName, functionName, args,username);
     }
 
 
@@ -57,7 +54,7 @@ public class FabricController {
 
     @PostMapping("/register")
     public String enrollUser(@RequestParam String username, @RequestParam String password) {
-        FabricUserRegistration.addUser(username, password);
+        fabricUserRegistration.addUser(username, password);
         return "User enrolled successfully";
     }
 }

@@ -1,38 +1,52 @@
 package com.blockchain.EHR.services;
-import com.blockchain.EHR.model.GatewayChannelPair;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
-import org.hyperledger.fabric.client.Contract;
+import io.grpc.netty.NettyChannelBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.hyperledger.fabric.client.Gateway;
-import org.hyperledger.fabric.client.Network;
-import org.hyperledger.fabric.client.identity.Identity;
-import org.hyperledger.fabric.client.identity.Signer;
-import org.hyperledger.fabric.client.identity.Signers;
-import org.hyperledger.fabric.client.identity.X509Identity;
+import org.hyperledger.fabric.client.identity.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.Signature;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.TimeUnit;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import static com.blockchain.EHR.config.FabricConfig.*;
+import static com.blockchain.EHR.config.FabricConfig.getPrivateKeyFromPem;
+import static com.blockchain.EHR.config.FabricConfig.readX509CertificateFromPem;
 
 @Service
-public class FabricService {
-    private static final String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/org1/wallet";
+public class FabricGatewayService {
 
+    private static final String WALLET_PATH = "path/to/wallet"; // Update with your wallet path
 
-    private GatewayChannelPair getFabricGateway(String username) throws Exception {
+    public Gateway fabricGateway(String username) throws Exception {
+        System.out.println("user "+username+" invoked transaction");
         ObjectMapper mapper = new ObjectMapper();
         ClassPathResource connectionProfileResource = new ClassPathResource("static/connection-profiles/org1/connection-org1.json");
         File connectionProfileFile = connectionProfileResource.getFile();
@@ -70,57 +84,11 @@ public class FabricService {
         ManagedChannel grpcChannel = Grpc.newChannelBuilder("localhost:7051", tlsCredentials)
                 .build();
 
-        Gateway gateway = Gateway.newInstance()
+        // Build and connect to Gateway
+        return Gateway.newInstance()
                 .identity(identity)
                 .signer(signer)
                 .connection(grpcChannel)
                 .connect();
-
-        return new GatewayChannelPair(gateway, grpcChannel);
-
     }
-
-    public String submitTransaction(String channelName, String chaincodeName, String functionName, String[] args,String username) {
-        GatewayChannelPair gatewayChannelPair = null;
-        try {
-            gatewayChannelPair = getFabricGateway(username);
-            Gateway gateway = gatewayChannelPair.getGateway();
-            Network network = gateway.getNetwork(channelName);
-            Contract contract = network.getContract(chaincodeName);
-
-            // Submit the transaction
-            byte[] result = contract.submitTransaction(functionName, args);
-            return new String(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Transaction failed";
-        } finally {
-            if (gatewayChannelPair != null) {
-                gatewayChannelPair.getGateway().close();
-                gatewayChannelPair.getChannel().shutdown();
-            }
-        }
-    }
-
-    public String evaluateTransaction(String channelName, String chaincodeName, String functionName, String[] args,String username) {
-        GatewayChannelPair gatewayChannelPair = null;
-        try {
-            gatewayChannelPair = getFabricGateway(username);
-            Gateway gateway = gatewayChannelPair.getGateway();
-            Network network = gateway.getNetwork(channelName);
-            Contract contract = network.getContract(chaincodeName);
-
-            byte[] result = contract.submitTransaction(functionName, args);
-            return new String(result, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Transaction failed";
-        } finally {
-            if (gatewayChannelPair != null) {
-                gatewayChannelPair.getGateway().close();
-                gatewayChannelPair.getChannel().shutdown();
-            }
-        }
-    }
-
 }
