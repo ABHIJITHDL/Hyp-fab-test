@@ -42,17 +42,19 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))  // Handle unauthorized access
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless sessions
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()  // Permit access to H2 console
-                        .requestMatchers("/fabric/login").permitAll()  // Permit access to login endpoint
-                        .anyRequest().authenticated()  // Require authentication for any other request
+                        .requestMatchers(new AntPathRequestMatcher("/frontend/**")).permitAll()  // Permit access to /frontend/**
+                        .requestMatchers("/fabric/login/**").permitAll()
+                        .requestMatchers("/fabric/login").permitAll()
+                        .anyRequest().permitAll()
                 );
-
+        http.csrf(csrf -> csrf
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/**"))
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/login")));
         // Ensure the authTokenFilter does not interfere with /fabric/login
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();

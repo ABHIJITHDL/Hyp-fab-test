@@ -81,6 +81,7 @@ public class FabricController {
 
     @PostMapping("/register")
     public String enrollUser(@RequestParam String username, @RequestParam String password) {
+        System.out.println("Received");
         if(fabricUserRegistration.addUser(username, password))
             return "User registered successfully";
         else
