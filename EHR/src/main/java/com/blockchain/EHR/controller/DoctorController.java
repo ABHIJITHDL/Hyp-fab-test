@@ -28,7 +28,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @Validated
 @RequestMapping("/fabric")
-public class DoctorgController {
+public class DoctorController {
 
     @Autowired
     private PdfService pdfService;
