@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register & Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="/index.css">
 </head>
 <body>
 
     <div class="container" id="signIn">
         <h1 class="form-title">Sign In</h1>
-        <form method="post" action="">
+        <form id="loginForm" method="post" action="">
             <div class="input-group">
                 <i class="fas fa-user"></i>
                 <input type="text" name="username" id="username" placeholder="user name" required>
@@ -25,14 +24,13 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-user"></i>
-                <input type="text" name="MSP" id="MSP" placeholder="MSP" required>
-                <label for="MSP">MSP</label>
+                <input type="text" name="mspId" id="mspId" placeholder="MSP" required>
+                <label for="mspId">MSP</label>
             </div>
             <input type="submit" class="btn" value="Sign In" name="signIn">
         </form>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
 </body>
 </html>
-

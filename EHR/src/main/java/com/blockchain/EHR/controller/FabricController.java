@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +38,7 @@ public class FabricController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password, @RequestParam String mspId) {
-        if (FabricUserRegistration.authenticateUser(username, password, mspId.substring(0, 1).toLowerCase() + mspId.substring(1, mspId.length() - 3))) {
+        if (fabricUserRegistration.authenticateUser(username, password, mspId)) {
             System.out.println("FabricUserRegistration works");
             CustomUserDetails userDetails = new CustomUserDetails(username, password, mspId, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
 
@@ -80,9 +83,11 @@ public class FabricController {
 
 
     @PostMapping("/register")
-    public String enrollUser(@RequestParam String username, @RequestParam String password) {
+    public String enrollUser(HttpServletRequest request,@RequestParam String username, @RequestParam String password) {
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         System.out.println("Received");
-        if(fabricUserRegistration.addUser(username, password))
+        if(fabricUserRegistration.addUser(username, password,mspId))
             return "User registered successfully";
         else
             return  "User registration failed";

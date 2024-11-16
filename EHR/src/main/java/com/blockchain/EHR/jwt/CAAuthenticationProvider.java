@@ -23,8 +23,7 @@ import static org.bouncycastle.asn1.x509.X509ObjectIdentifiers.organization;
 @Component
 public class CAAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String CA_URL = "https://localhost:7054"; // Your CA URL
-    private static final String CA_CERT_PATH = "/path/to/ca/cert.pem"; // Your CA Cert Path
+    FabricUserRegistration fabricUserRegistration;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -43,7 +42,7 @@ public class CAAuthenticationProvider implements AuthenticationProvider {
             caClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
 
             // Step 2: Authenticate the user
-            boolean isAuthenticated = FabricUserRegistration.authenticateUser(username, password, mspId.toLowerCase().replace("MSP",""));
+            boolean isAuthenticated = fabricUserRegistration.authenticateUser(username, password, mspId.toLowerCase().replace("MSP",""));
             if (!isAuthenticated) {
                 throw new BadCredentialsException("Invalid username or password");
             }

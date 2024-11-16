@@ -6,7 +6,7 @@ rm genesis.block mychannel.tx
 rm -rf ../../channel-artifacts/*
 
 # Generate Crypto artifactes for organizations
- cryptogen generate --config=./crypto-config.yaml --output=./crypto-config/
+cryptogen generate --config=./crypto-config.yaml --output=./crypto-config/
 
 
 
