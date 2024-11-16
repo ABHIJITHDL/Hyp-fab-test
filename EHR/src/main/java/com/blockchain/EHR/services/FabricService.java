@@ -22,6 +22,9 @@ public class FabricService {
         GatewayChannelPair gatewayChannelPair = null;
         try {
             gatewayChannelPair = fabricGatewayService.getFabricGateway(username,mspId);
+            if(gatewayChannelPair==null){
+               System.out.println("Gateway not found");
+            }
             Gateway gateway = gatewayChannelPair.gateway();
             Network network = gateway.getNetwork(channelName);
             Contract contract = network.getContract(chaincodeName);
