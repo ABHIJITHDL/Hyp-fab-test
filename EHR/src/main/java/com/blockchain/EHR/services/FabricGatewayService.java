@@ -71,7 +71,7 @@ public class FabricGatewayService {
         Identity identity = new X509Identity(mspId, certificate);
         PrivateKey privateKey = getPrivateKeyFromPem(privateKeyPem);
         Signer signer = Signers.newPrivateKeySigner(privateKey);
-
+        System.out.println("Signer created");
         // Set up TLS credentials
         ChannelCredentials tlsCredentials = TlsChannelCredentials.newBuilder()
                 .trustManager(tlsCertPath.toFile())
