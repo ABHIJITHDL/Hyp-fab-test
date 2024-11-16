@@ -3,252 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hyperledger Fabric Interface with Self-Signed Certificate</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/0.10.0/forge.min.js"></script>
+    <title>Patient PDF Upload/Download</title>
     <style>
+        /* Basic styles for the page */
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
         }
-        h1, h2 {
+
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
             color: #333;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        .form-container {
+            margin-bottom: 30px;
         }
+
+        h2 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            font-size: 14px;
+            margin: 10px 0 5px;
         }
-        input[type="text"], input[type="file"], textarea {
+
+        input[type="text"],
+        input[type="file"] {
             width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #result, #certificateDisplay {
-            margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            white-space: pre-wrap;
-            word-break: break-all;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        #message {
+            color: #d9534f;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-<h1>Hyperledger Fabric Interface with Self-Signed Certificate</h1>
+<div class="container">
+    <h1>Patient PDF Upload and Download</h1>
 
-<h2>Step 1: Load Private Key</h2>
-<div class="form-group">
-    <label for="keyFile">Private Key File (PEM or DER format):</label>
-    <input type="file" id="keyFile" accept=".pem,.der">
-</div>
-<button onclick="loadPrivateKey()">Load Private Key</button>
-<div id="result"></div>
+    <!-- Upload PDF Form -->
+    <div class="form-container">
+        <h2>Upload Patient PDF</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="pid">Patient ID:</label>
+            <input type="text" id="pid" name="pid" required>
 
-<h2>Step 2: Submit Transaction</h2>
-<div class="form-group">
-    <label for="channelName">Channel Name:</label>
-    <input type="text" id="channelName" value="mychannel">
+            <label for="eid">Employee ID:</label>
+            <input type="text" id="eid" name="eid" required>
+
+            <label for="file">Upload PDF:</label>
+            <input type="file" id="file" name="file" accept=".pdf" required>
+
+            <button type="submit">Upload PDF</button>
+        </form>
+    </div>
+
+    <!-- Download PDF Form -->
+    <div class="form-container">
+        <h2>Download Patient PDF</h2>
+        <label for="downloadPid">Enter Patient ID:</label>
+        <input type="text" id="downloadPid" required>
+        <button onclick="downloadPdf()">Download PDF</button>
+    </div>
+
+    <div id="message"></div>
 </div>
-<div class="form-group">
-    <label for="chaincodeName">Chaincode Name:</label>
-    <input type="text" id="chaincodeName" value="ehr">
-</div>
-<div class="form-group">
-    <label for="functionName">Function Name:</label>
-    <input type="text" id="functionName" value="getAllEHRRecordsForPatient">
-</div>
-<div class="form-group">
-    <label for="args">Arguments:</label>
-    <input type="text" id="args" value="P01">
-</div>
-<button onclick="submitTransaction()">Submit Transaction</button>
-<button onclick="login()">Login</button>
-<div id="result"></div>
 
 <script>
-    let privateKey;
+    // Upload PDF
+    document.getElementById("uploadForm").addEventListener("submit", function(event) {
+        event.preventDefault();
 
-    async function loadPrivateKey() {
-    const keyFile = document.getElementById('keyFile').files[0];
+        const formData = new FormData();
+        formData.append("pid", document.getElementById("pid").value);
+        formData.append("eid", document.getElementById("eid").value);
+        formData.append("file", document.getElementById("file").files[0]);
 
-    if (!keyFile) {
-        alert('Please select a private key file.');
-        return;
-    }
-
-    try {
-        const keyText = await readFileAsText(keyFile);
-
-        if (keyText.includes('-----BEGIN PRIVATE KEY-----')) {
-            // It's a PEM format key
-            console.log('Detected PEM format');
-            const keyData = pemToArrayBuffer(keyText);
-            await importPrivateKey(keyData, true); // True for PEM
-        } else {
-            // It must be a binary (DER) format key
-            console.log('Detected binary DER format');
-            const keyData = await readFileAsArrayBuffer(keyFile);
-            await importPrivateKey(keyData, false); // False for DER
-        }
-
-        console.log('Private key loaded successfully');
-        document.getElementById('result').innerText = 'Private key loaded successfully.';
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('result').innerText = 'Failed to load private key. See console for details.';
-    }
-}
-
-async function importPrivateKey(keyData, isPem) {
-    if (isPem) {
-        // If it's a PEM format, decode it first
-        const keyDer = forge.util.decode64(forge.pem.decode(keyData)[0].body);
-        keyData = str2ab(keyDer);
-    }
-
-    privateKey = await crypto.subtle.importKey(
-        "pkcs8", // Format of the key
-        keyData, // Key data (converted if PEM)
-        { name: "ECDSA", namedCurve: "P-256" }, // EC key (P-256 curve)
-        true, // Whether the key is extractable
-        ["sign"] // Key usage
-    );
-}
-
-async function importPrivateKey(keyData, isPem) {
-    if (isPem) {
-        console.log('Raw PEM content before processing:', keyData); // Log raw PEM content
-
-        try {
-            // Directly use the Base64-decoded key data, no need for forge.pem.decode()
-            const keyDer = window.atob(keyData); // Decode Base64 directly
-            keyData = str2ab(keyDer); // Convert to ArrayBuffer
-
-        } catch (error) {
-            console.error("Error during Base64 decoding:", error);
-            throw new Error("Invalid Base64 content in PEM message.");
-        }
-    }
-
-    try {
-        privateKey = await crypto.subtle.importKey(
-            "pkcs8", // Format of the key
-            keyData, // Key data (converted from Base64)
-            { name: "ECDSA", namedCurve: "P-256" }, // EC key (P-256 curve)
-            true, // Whether the key is extractable
-            ["sign"] // Key usage
-        );
-    } catch (importError) {
-        console.error("Error importing key:", importError);
-        throw new Error("Failed to import the private key.");
-    }
-}
-
-function pemToArrayBuffer(pem) {
-    const pemHeader = "-----BEGIN PRIVATE KEY-----";
-    const pemFooter = "-----END PRIVATE KEY-----";
-
-    // Clean the PEM content by removing headers, footers, newlines, and spaces
-    const pemContents = pem
-        .replace(pemHeader, '')
-        .replace(pemFooter, '')
-        .replace(/\r?\n|\r/g, '') // Remove all newlines
-        .replace(/\s+/g, ''); // Remove all spaces
-
-    console.log('Cleaned Base64 PEM content:', pemContents); // Log cleaned base64 content
-
-    return pemContents; // Return the cleaned Base64 string for further processing
-}
-
-function str2ab(str) {
-    const buf = new ArrayBuffer(str.length);
-    const bufView = new Uint8Array(buf);
-    for (let i = 0, strLen = str.length; i < strLen; i++) {
-        bufView[i] = str.charCodeAt(i);
-    }
-    return buf;
-}
-
-
-
-function str2ab(str) {
-    const buf = new ArrayBuffer(str.length);
-    const bufView = new Uint8Array(buf);
-    for (let i = 0, strLen = str.length; i < strLen; i++) {
-        bufView[i] = str.charCodeAt(i);
-    }
-    return buf;
-}
-
-function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => resolve(event.target.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsText(file); // Read as text to detect PEM
+        fetch("http://localhost:8080/fabric/patient/upload", {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("message").textContent = "PDF uploaded successfully!";
+        })
+        .catch(error => {
+            document.getElementById("message").textContent = "Error during upload: " + error.message;
+        });
     });
-}
 
-function readFileAsArrayBuffer(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => resolve(event.target.result);
-        reader.onerror = (error) => reject(error);
-        reader.readAsArrayBuffer(file); // Read as ArrayBuffer for DER
-    });
-}
+    // View PDF in the browser
+    function downloadPdf() {
+        const pid = document.getElementById("downloadPid").value;
+        fetch(`http://localhost:8080/fabric/patient/${pid}/pdf`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();  // Get the PDF file as a blob
+                } else {
+                    throw new Error("Patient not found or error occurred.");
+                }
+            })
+            .then(blob => {
+                // Create an object URL for the PDF
+                const url = URL.createObjectURL(blob);
 
-
-    async function submitTransaction() {
-        const channelName = document.getElementById('channelName').value;
-        const chaincodeName = document.getElementById('chaincodeName').value;
-        const functionName = document.getElementById('functionName').value;
-        const args = document.getElementById('args').value;
-
-        if (!privateKey) {
-            alert('Please load a private key first.');
-            return;
-        }
-
-        const transactionData = `${channelName}${chaincodeName}${functionName}${args}`;
-
-        try {
-            const md = forge.md.sha256.create();
-            md.update(transactionData, 'utf8');
-            const digest = new Uint8Array(forge.util.createBuffer(md.digest().bytes()).getBytes().split('').map(c => c.charCodeAt(0)));
-
-            const signature = await crypto.subtle.sign({ name: "ECDSA", hash: { name: "SHA-256" } }, privateKey, digest);
-            const signatureBytes = new Uint8Array(signature);
-            const signatureBase64 = forge.util.encode64(String.fromCharCode.apply(null, signatureBytes));
-
-            const dataToSend = { signature: signatureBase64, channelName, chaincodeName, functionName, args };
-            const response = await fetch('/fabric/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataToSend)
+                // Open the PDF in a new tab to view it
+                window.open(url, '_blank');
+            })
+            .catch(error => {
+                document.getElementById("message").textContent = "Error during download: " + error.message;
             });
-
-            const result = await response.text();
-            document.getElementById('result').innerText = result;
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('result').innerText = 'An error occurred. Please check the console for details.';
-        }
     }
 </script>
 </body>
