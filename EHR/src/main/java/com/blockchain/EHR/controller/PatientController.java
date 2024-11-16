@@ -2,6 +2,7 @@ package com.blockchain.EHR.controller;
 
 import com.blockchain.EHR.Repository.PatientRepository;
 import com.blockchain.EHR.model.Patient;
+import com.blockchain.EHR.services.FabricService;
 import com.blockchain.EHR.services.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.spel.ast.OpAnd;
@@ -62,6 +63,18 @@ public class PatientController {
                     .body(pdfFile);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/patient/history")
+    public ResponseEntity<?> getPatientHistory(@RequestParam String pid){
+        System.out.println("Received request for patient history: " + pid);
+        try {
+            Map<String, Object> history = FabricService.submitTransaction("ehrchannel", "ehr", "getHistory", pid);
+            return new ResponseEntity<>(history, HttpStatus.OK);
+        } catch (Exception e) {
+            System.err.println("Error during history retrieval: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
