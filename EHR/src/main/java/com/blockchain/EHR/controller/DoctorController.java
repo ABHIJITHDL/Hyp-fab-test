@@ -4,24 +4,22 @@ import com.blockchain.EHR.Repository.PatientRepository;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.services.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "*")
 @Validated
 @RequestMapping("/fabric")
-public class PatientController {
+public class DoctorController {
 
     @Autowired
     private PdfService pdfService;
@@ -42,12 +40,7 @@ public class PatientController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//    @GetMapping("/patient/{pid}/pdf")
-//    public ResponseEntity<byte[]>getPdf(@PathVariable String pid){
-//        Optional<Patient>patientOptional=patientRepository.findById(pid);
-//        byte[] pdfFile=patientOptional.get().getPdfData();
-//        return ResponseEntity.ok().body(pdfFile);
-//    }
+
     @GetMapping("/patient/{pid}/pdf")
     public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
         Optional<Patient> patientOptional = patientRepository.findById(pid);
@@ -64,6 +57,17 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
+
+@PostMapping("/update-pdf")
+public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam String newText) {
+    try {
+        pdfService.updatePdf(pid, newText);
+        return ResponseEntity.ok("PDF updated successfully!");
+    } catch (IOException e) {
+        return ResponseEntity.status(500).body("Error updating PDF: " + e.getMessage());
+    }
+}
+
 
 }
 
