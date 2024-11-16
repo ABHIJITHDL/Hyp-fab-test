@@ -28,7 +28,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @Validated
 @RequestMapping("/fabric")
-public class DoctorgController {
+public class PatientController {
 
     @Autowired
     private PdfService pdfService;
@@ -67,15 +67,15 @@ public class DoctorgController {
         }
     }
 
-    @PostMapping("/update-pdf")
-    public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam String newText) {
-        try {
-            pdfService.updatePdf(pid, newText);
-            return ResponseEntity.ok("PDF updated successfully!");
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error updating PDF: " + e.getMessage());
-        }
+@PostMapping("/update-pdf")
+public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam String newText) {
+    try {
+        pdfService.updatePdf(pid, newText);
+        return ResponseEntity.ok("PDF updated successfully!");
+    } catch (IOException e) {
+        return ResponseEntity.status(500).body("Error updating PDF: " + e.getMessage());
     }
+}
 
 
 }
