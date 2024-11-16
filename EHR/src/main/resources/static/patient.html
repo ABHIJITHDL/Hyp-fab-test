@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHR Patient Records</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Background and Page Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: linear-gradient(to right, #83a4d4, #b6fbff);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            width: 100%;
+            background-color: #7791a8;
+            padding: 15px 0;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Main Content Wrapper */
+        .content-wrapper {
+            width: 750px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Content Container Styling */
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        /* Dropdown and Button Styling */
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .status-button {
+            background-color: #0073e6;
+            color: white;
+            border: none;
+        }
+
+        .status-button:hover {
+            background-color: #005bb5;
+        }
+
+        /* Doctor Actions Row */
+        .doctor-actions-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .doctor-id-display {
+            font-weight: bold;
+            color: #333;
+            margin-right: auto;
+            padding-left: 10px;
+        }
+
+        .doctor-button {
+            padding: 10px;
+            font-size: 14px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .accept-button {
+            background-color: #4CAF50;
+        }
+
+        .accept-button:hover {
+            background-color: #45a049;
+        }
+
+        .revoke-button {
+            background-color: #f44336;
+        }
+
+        .revoke-button:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Hide Doctor Actions initially */
+        #doctor-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div class="navbar">Electronic Health Record System</div>
+
+<!-- Main Content Wrapper -->
+<div class="content-wrapper">
+
+    <!-- Patient Dashboard Container -->
+    <div class="container" id="status-container">
+        <h2>Patient Dashboard</h2>
+        <form id="status-form" action="" method="POST">
+            <label for="status">Choose Status:</label>
+            <select name="status" id="status" required onchange="toggleDoctorActions()">
+                <option value="Accepted">Accepted</option>
+                <option value="Pending">Pending</option>
+            </select>
+          
+        </form>
+    </div>
+
+    <!-- Doctor Actions Container -->
+    <div class="container" id="doctor-container">
+        <h2>Doctor Actions</h2>
+        <div class="doctor-actions-row">
+            <!-- Doctor ID Display -->
+            <div class="doctor-id-display" id="doctor-id">Doctor ID: D12345</div>
+            <!-- Accept and Revoke Buttons -->
+            <button class="doctor-button accept-button" onclick="handleAction('Accept')">Accept</button>
+            <button class="doctor-button revoke-button" onclick="handleAction('Revoke')">Revoke</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Fetch doctor data and set Doctor ID on page load (replace with actual data fetch as needed)
+    function fetchDoctorData() {
+        const data = { doctorId: "D12345" }; // Example JSON data
+        document.getElementById("doctor-id").textContent = `Doctor ID: ${data.doctorId}`;
+    }
+
+    // Run fetchDoctorData on page load
+    window.onload = fetchDoctorData;
+
+    // Toggle visibility of Doctor Actions based on status selection
+    function toggleDoctorActions() {
+        const status = document.getElementById("status").value;
+        const doctorContainer = document.getElementById("doctor-container");
+        doctorContainer.style.display = status === "Pending" ? "block" : "none";
+    }
+
+    // Handle Accept and Revoke button actions
+    function handleAction(action) {
+        const doctorId = document.getElementById("doctor-id").textContent;
+        alert(`Doctor Action: ${action} for ${doctorId}`);
+        // Add server-side handling for actions
+    }
+</script>
+
+</body>
+</html>
