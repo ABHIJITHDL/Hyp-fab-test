@@ -21,6 +21,8 @@ import com.itextpdf.layout.element.Paragraph;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -77,6 +79,15 @@ public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam 
     }
 }
 
+//    @GetMapping("/patients/all")
+//    List<String>getAll(){
+//        List<Patient>getAll=patientRepository.findAll();
+//        List<String>pids=new ArrayList<>();
+//        for (Patient patient:getAll
+//             ) {
+//            pids.add(getAll.getPatientId())
+//        }
+//    }
 
 }
 
