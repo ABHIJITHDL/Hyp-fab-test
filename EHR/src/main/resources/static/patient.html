@@ -111,8 +111,8 @@
             background-color: #d32f2f;
         }
 
-        /* Hide Doctor Actions initially */
-        #doctor-container {
+        /* Hide Doctor Actions and Accepted Doctors initially */
+        #doctor-container, #doctor-list {
             display: none;
         }
     </style>
@@ -134,8 +134,11 @@
                 <option value="Accepted">Accepted</option>
                 <option value="Pending">Pending</option>
             </select>
-          
         </form>
+        <div id="doctor-list">
+            <h2>Accepted Doctors</h2>
+            <ul id="doctor-list-ul"></ul>
+        </div>
     </div>
 
     <!-- Doctor Actions Container -->
@@ -153,20 +156,27 @@
 </div>
 
 <script>
-    // Fetch doctor data and set Doctor ID on page load (replace with actual data fetch as needed)
-    function fetchDoctorData() {
-        const data = { doctorId: "D12345" }; // Example JSON data
-        document.getElementById("doctor-id").textContent = `Doctor ID: ${data.doctorId}`;
-    }
+    let dataFetched = false; // Flag to check if data has already been fetched
 
-    // Run fetchDoctorData on page load
-    window.onload = fetchDoctorData;
-
-    // Toggle visibility of Doctor Actions based on status selection
+    // Toggle visibility of Doctor Actions and fetch accepted doctors based on status selection
     function toggleDoctorActions() {
         const status = document.getElementById("status").value;
         const doctorContainer = document.getElementById("doctor-container");
-        doctorContainer.style.display = status === "Pending" ? "block" : "none";
+        const doctorList = document.getElementById("doctor-list");
+
+        if (status === "Accepted") {
+            doctorContainer.style.display = "none";
+            doctorList.style.display = "block";
+            if (!dataFetched) {
+                fetchDoctorData();
+            }
+        } else if (status === "Pending") {
+            doctorContainer.style.display = "block";
+            doctorList.style.display = "none";
+        } else {
+            doctorContainer.style.display = "none";
+            doctorList.style.display = "none";
+        }
     }
 
     // Handle Accept and Revoke button actions
@@ -175,6 +185,64 @@
         alert(`Doctor Action: ${action} for ${doctorId}`);
         // Add server-side handling for actions
     }
+
+    // Fetch doctor data
+    function fetchDoctorData() {
+        console.log(localStorage.getItem('jwt'));
+        fetch('/fabric/patient/accepted', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            const doctorListUl = document.getElementById('doctor-list-ul');
+            doctorListUl.innerHTML = ''; // Clear any existing content
+            data.forEach(doctorId => {
+                const li = document.createElement('li');
+                li.classList.add('doctor-actions-row');
+                
+                const doctorIdDiv = document.createElement('div');
+                doctorIdDiv.classList.add('doctor-id-display');
+                doctorIdDiv.textContent = `Doctor ID: ${doctorId}`;
+                
+                const button = document.createElement('button');
+                button.classList.add('doctor-button');
+                button.textContent = 'View History';
+                button.onclick = () => viewHistory(doctorId);
+                
+                li.appendChild(doctorIdDiv);
+                li.appendChild(button);
+                doctorListUl.appendChild(li);
+            });
+            dataFetched = true; // Set the flag to true after data is fetched
+        })
+        .catch(error => {
+            console.error('Error fetching doctor data:', error);
+        });
+    }
+
+    // Function to handle View History button click
+    function viewHistory(doctorId) {
+        alert(`Viewing history for Doctor ID: ${doctorId}`);
+        // Add logic to fetch and display the doctor's history
+    }
+
+    // Call the function to fetch and display doctor data when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const status = document.getElementById("status").value;
+        if (status === "Accepted") {
+            fetchDoctorData();
+        }
+    });
 </script>
 
 </body>
