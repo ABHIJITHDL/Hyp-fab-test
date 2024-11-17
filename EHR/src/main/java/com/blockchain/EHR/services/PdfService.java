@@ -1,7 +1,8 @@
 package com.blockchain.EHR.services;
 
-import com.blockchain.EHR.Repository.PatientRepository;
+
 import com.blockchain.EHR.model.Patient;
+import com.blockchain.EHR.repository.PatientRepository;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;

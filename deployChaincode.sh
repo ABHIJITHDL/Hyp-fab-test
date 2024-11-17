@@ -173,7 +173,7 @@ chaincodeInvoke(){
     --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
     --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
     --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-    -c '{"function": "createEHRRecord","Args": ["D02","P01","HS222","2024-04-04"]}'
+    -c '{"function": "createEHRRecord","Args": ["D01","P01","HS111","2024-03-23"]}'
     
     setGlobalsForPeer0Org1
 
@@ -221,17 +221,17 @@ chaincodeQuery(){
 
 #presetup
 # packageChaincode
-installChaincode
-queryInstalled
-approveForMyOrg1
-checkCommitReadyness
-approveForMyOrg2
-checkCommitReadyness
-commitChaincodeDefination
-queryCommitted
-sleep 3
-chaincodeInvokeInit
- sleep 5
+#installChaincode
+#queryInstalled
+#approveForMyOrg1
+#checkCommitReadyness
+#approveForMyOrg2
+#checkCommitReadyness
+#commitChaincodeDefination
+#queryCommitted
+#sleep 3
+#chaincodeInvokeInit
+# sleep 5
  chaincodeInvoke
 # sleep 3
 # chaincodeQuery

@@ -1,9 +1,9 @@
 package com.blockchain.EHR.services;
 
+import com.blockchain.EHR.model.Transaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,22 @@ public class PatientService {
         return doctorIds;
     }
 
-    public List<Map<String,String>> getHistory(String pid,String mspId){
-        String[] args = {pid,""}
+    public List<Transaction> getHistory(String pid,String did,String mspId) throws JsonProcessingException {
+        String[] args = {pid,did};
+        System.out.println("Submitting transaction");
+        String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,pid,mspId);
+        System.out.println("Response"+response);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(response);
+
+        List<Transaction> transactions = new ArrayList<>();
+        for (JsonNode transactionNode : rootNode.path("transactions")){
+            Transaction transaction = new Transaction();
+            transaction.setType(transactionNode.path("type").asText());
+            transaction.setTimestamp(transactionNode.path("timestamp").asText());
+            transaction.setHash(transactionNode.path("hash").asText());
+            transactions.add(transaction);
+        }
+        return transactions;
     }
 }

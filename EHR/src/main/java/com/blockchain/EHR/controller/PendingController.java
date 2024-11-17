@@ -1,10 +1,11 @@
 package com.blockchain.EHR.controller;
 
-import com.blockchain.EHR.Repository.PatientRepository;
-import com.blockchain.EHR.Repository.PendingRepository;
+
 import com.blockchain.EHR.jwt.JwtUtils;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.Pending;
+import com.blockchain.EHR.repository.PatientRepository;
+import com.blockchain.EHR.repository.PendingRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

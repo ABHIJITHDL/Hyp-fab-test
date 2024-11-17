@@ -1,8 +1,10 @@
 package com.blockchain.EHR.controller;
 
-import com.blockchain.EHR.Repository.PatientRepository;
+
 import com.blockchain.EHR.jwt.JwtUtils;
 import com.blockchain.EHR.model.Patient;
+import com.blockchain.EHR.model.Transaction;
+import com.blockchain.EHR.repository.PatientRepository;
 import com.blockchain.EHR.services.PatientService;
 import com.blockchain.EHR.services.PdfService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -79,5 +81,22 @@ public class PatientController {
         }
     }
 
+    @GetMapping("/history/{did}")
+    public ResponseEntity<List<Transaction>> getDoctorHistory(HttpServletRequest request, @PathVariable String did) {
+        System.out.println("Controller called");
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String pid = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+
+        try {
+            System.out.println("calling GetHistory");
+            List<Transaction> transactions = patientService.getHistory(pid, did , mspId);
+            return new ResponseEntity<>(transactions, HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+    }
 }
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Background and Page Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: linear-gradient(to right, #83a4d4, #b6fbff);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            width: 100%;
+            background-color: #7791a8;
+            padding: 15px 0;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        /* Logout and Back Buttons */
+        .button-container {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #d32f2f;
+        }
+
+        .back-button {
+            background-color: #0073e6;
+        }
+
+        .back-button:hover {
+            background-color: #005bb5;
+        }
+
+        /* Main Content Wrapper */
+        .content-wrapper {
+            width: 80%;
+            max-width: 1000px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Content Container Styling */
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<div class="navbar">
+    Doctor History
+    <div class="button-container">
+        <button class="button logout-button" id="logoutButton">Logout</button>
+        <button class="button back-button" id="backButton">Go Back</button>
+    </div>
+</div>
+
+<!-- Main Content Wrapper -->
+<div class="content-wrapper">
+    <div class="container">
+        <h2 id="doctor-id-title"></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Timestamp</th>
+                    <th>Hash</th>
+                </tr>
+            </thead>
+            <tbody id="history-table-body">
+                <!-- History data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const doctorId = localStorage.getItem('doctorId');
+        const historyData = JSON.parse(localStorage.getItem('historyData'));
+
+        document.getElementById('doctor-id-title').textContent = `History for Doctor ID: ${doctorId}`;
+
+        const historyTableBody = document.getElementById('history-table-body');
+        historyTableBody.innerHTML = ''; // Clear any existing content
+
+        historyData.forEach(item => {
+            const row = document.createElement('tr');
+
+            const typeCell = document.createElement('td');
+            typeCell.textContent = item.type;
+            row.appendChild(typeCell);
+
+            const timestampCell = document.createElement('td');
+            timestampCell.textContent = item.timestamp;
+            row.appendChild(timestampCell);
+
+            const hashCell = document.createElement('td');
+            hashCell.textContent = item.hash;
+            row.appendChild(hashCell);
+
+            historyTableBody.appendChild(row);
+        });
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('jwt'); // Remove the JWT from local storage
+        window.location.href = '/login.html'; // Redirect to the login page
+    });
+
+    document.getElementById('backButton').addEventListener('click', function() {
+        window.location.href = '/patient.html'; // Redirect to the patient page
+    });
+</script>
+
+</body>
+</html>

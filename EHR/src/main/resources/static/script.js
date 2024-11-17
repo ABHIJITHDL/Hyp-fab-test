@@ -26,7 +26,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     })
     .then(token => {
         localStorage.setItem('jwt', token); // Save the JWT in local storage
-        redirectToHome(mspId); // Redirect based on mspId
+        redirectToHome(username,mspId); // Redirect based on mspId
     })
     .catch(error => {
         console.error('Error during login:', error);
@@ -34,9 +34,10 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     });
 });
 
-function redirectToHome(mspId) {
-    // Redirect based on mspId
-    if (mspId === 'Org1MSP') {
+function redirectToHome(username, mspId) {
+    if (username === 'admin') {
+        window.location.href = '/admin.html';
+    } else if (mspId === 'Org1MSP') {
         window.location.href = '/doctor.html';
     } else if (mspId === 'Org2MSP') {
         window.location.href = '/patient.html';

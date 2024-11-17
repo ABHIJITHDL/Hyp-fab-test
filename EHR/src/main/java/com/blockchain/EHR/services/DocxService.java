@@ -1,7 +1,8 @@
 package com.blockchain.EHR.services;
 
-import com.blockchain.EHR.Repository.PatientRepository;
+
 import com.blockchain.EHR.model.Patient;
+import com.blockchain.EHR.repository.PatientRepository;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.springframework.beans.factory.annotation.Autowired;

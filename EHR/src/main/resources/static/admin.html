@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register & Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* Additional styles for the logout button */
+        .logout-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logout-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logout-container">
+        <button class="logout-button" id="logoutButton">Logout</button>
+    </div>
+
+    <div class="container" id="signIn">
+        <h1 class="form-title">Add User</h1>
+        <form id="registerForm">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" id="username" placeholder="user name" required>
+                <label for="username">User id</label>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" id="password" placeholder="password" required>
+                <label for="password">Password</label>
+            </div>
+            <input type="submit" class="btn" value="Add" name="Signin">
+        </form>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
