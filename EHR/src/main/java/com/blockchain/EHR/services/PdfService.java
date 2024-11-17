@@ -21,10 +21,10 @@ public class PdfService {
     private PatientRepository patientRepository;
 
     // Upload PDF (store patient and file)
-    public Patient upload(String pid, String eid, MultipartFile pdf) throws IOException {
+    public Patient upload(String pid, MultipartFile pdf) throws IOException {
         Patient patient = new Patient();
         patient.setPatientId(pid);
-        patient.setEhrId(eid);
+        patient.setEhrId(pid);
         patient.setPdfData(pdf.getBytes());
         return patientRepository.save(patient);
     }

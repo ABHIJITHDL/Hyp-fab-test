@@ -37,7 +37,8 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
 function redirectToHome(username, mspId) {
     if (username === 'admin') {
         window.location.href = '/admin.html';
-    } else if (mspId === 'Org1MSP') {
+    }
+    else if (mspId === 'Org1MSP') {
         window.location.href = '/doctor.html';
     } else if (mspId === 'Org2MSP') {
         window.location.href = '/patient.html';

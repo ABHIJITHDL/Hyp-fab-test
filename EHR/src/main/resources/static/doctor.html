@@ -1,260 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Doctor Dashboard</title>-->
-<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> &lt;!&ndash; jsPDF Library &ndash;&gt;-->
-<!--    <style>-->
-<!--        /* General Page Styling */-->
-<!--        body {-->
-<!--            font-family: Arial, sans-serif;-->
-<!--            background-image: linear-gradient(to right, #83a4d4, #b6fbff);-->
-<!--            margin: 0;-->
-<!--            padding: 0;-->
-<!--            color: #333;-->
-<!--            display: flex;-->
-<!--            flex-direction: column;-->
-<!--            align-items: center;-->
-<!--            min-height: 100vh;-->
-<!--        }-->
-
-<!--        /* Navigation Bar */-->
-<!--        .navbar {-->
-<!--            width: 100%;-->
-<!--            background-color: #7791a8;-->
-<!--            color: white;-->
-<!--            padding: 15px 0;-->
-<!--            text-align: center;-->
-<!--            font-size: 24px;-->
-<!--            font-weight: bold;-->
-<!--        }-->
-
-<!--        /* Main Content */-->
-<!--        .main-container {-->
-<!--            display: flex;-->
-<!--            flex-direction: column;-->
-<!--            padding: 20px;-->
-<!--            width: 90%;-->
-<!--            max-width: 1200px;-->
-<!--            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);-->
-<!--            border-radius: 8px;-->
-<!--            background-color: #fff;-->
-<!--        }-->
-
-<!--        /* Patient List Styling */-->
-<!--        .patient-list {-->
-<!--            margin-top: 20px;-->
-<!--            width: 100%;-->
-<!--            text-align: left;-->
-<!--        }-->
-
-<!--        .patient-item {-->
-<!--            padding: 15px;-->
-<!--            margin-bottom: 10px;-->
-<!--            background-color: #f9f9f9;-->
-<!--            border: 1px solid #ddd;-->
-<!--            border-radius: 4px;-->
-<!--            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);-->
-<!--            display: flex;-->
-<!--            justify-content: space-between;-->
-<!--            align-items: center;-->
-<!--        }-->
-
-<!--        .patient-item h4 {-->
-<!--            margin: 0;-->
-<!--            font-size: 18px;-->
-<!--            color: #068fbc;-->
-<!--        }-->
-
-<!--        .view-button, .update-button {-->
-<!--            background-color: #068fbc; /* Light blue */-->
-<!--            color: white;-->
-<!--            border: none;-->
-<!--            padding: 10px 15px;-->
-<!--            font-size: 14px;-->
-<!--            border-radius: 4px;-->
-<!--            cursor: pointer;-->
-<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);-->
-<!--        }-->
-
-<!--        .view-button:hover, .update-button:hover {-->
-<!--            background-color: #89c2d9;-->
-<!--        }-->
-
-<!--        /* Input and Button Styling */-->
-<!--        .form-container {-->
-<!--            display: flex;-->
-<!--            justify-content: center;-->
-<!--            align-items: center;-->
-<!--            gap: 10px;-->
-<!--            margin-top: 20px;-->
-<!--        }-->
-
-<!--        .form-container input {-->
-<!--            width: 60%;-->
-<!--            max-width: 400px;-->
-<!--            padding: 10px;-->
-<!--            font-size: 16px;-->
-<!--            border: 1px solid #ddd;-->
-<!--            border-radius: 4px;-->
-<!--        }-->
-
-<!--        .form-container button {-->
-<!--            background-color: #068fbc; /* Light blue */-->
-<!--            color: white;-->
-<!--            border: none;-->
-<!--            padding: 10px 20px;-->
-<!--            font-size: 16px;-->
-<!--            border-radius: 4px;-->
-<!--            cursor: pointer;-->
-<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);-->
-<!--        }-->
-
-<!--        .form-container button:hover {-->
-<!--            background-color: #89c2d9;-->
-<!--        }-->
-
-<!--        /* Text Area for Editing PDF */-->
-<!--        #edit-pdf-modal {-->
-<!--            display: none;-->
-<!--            text-align: center;-->
-<!--            padding: 20px;-->
-<!--            border: 1px solid #ddd;-->
-<!--            margin-top: 20px;-->
-<!--        }-->
-
-<!--        #edit-pdf-modal textarea {-->
-<!--            width: 80%;-->
-<!--            height: 150px;-->
-<!--            margin-top: 10px;-->
-<!--            padding: 10px;-->
-<!--            font-size: 14px;-->
-<!--            border: 1px solid #ddd;-->
-<!--            border-radius: 4px;-->
-<!--        }-->
-
-<!--        #edit-pdf-modal button {-->
-<!--            margin-top: 10px;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-
-<!--&lt;!&ndash; Navbar &ndash;&gt;-->
-<!--<div class="navbar">Electronic Health Record System</div>-->
-
-<!--&lt;!&ndash; Main Container &ndash;&gt;-->
-<!--<div class="main-container">-->
-<!--    &lt;!&ndash; Patient ID Input with + Button &ndash;&gt;-->
-<!--    <div class="form-container">-->
-<!--        <input type="text" id="patient-id" placeholder="Enter Patient ID">-->
-<!--        <button class="add-small-button" onclick="addRecord()">+</button>-->
-<!--        <button onclick="viewPDFByID()">View PDF</button>-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Patient Records List &ndash;&gt;-->
-<!--    <div class="patient-list" id="patient-list">-->
-<!--        &lt;!&ndash; List of all patient records will be dynamically generated here &ndash;&gt;-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Update PDF Form (Text Editing) &ndash;&gt;-->
-<!--    <div id="edit-pdf-modal">-->
-<!--        <h3>Edit PDF for Patient</h3>-->
-<!--        <textarea id="pdf-text-input" placeholder="Enter text to append to the PDF"></textarea>-->
-<!--        <button onclick="updatePDF()">Save Changes</button>-->
-<!--        <button onclick="closeEditModal()">Cancel</button>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--    const patients = [-->
-<!--        { id: 'P001', name: 'John Doe', pdfPath: '/patient/P001/pdf' },-->
-<!--        { id: 'P002', name: 'Jane Smith', pdfPath: '/patient/P002/pdf' },-->
-<!--        { id: 'P003', name: 'Alice Brown', pdfPath: '/patient/P003/pdf' },-->
-<!--    ];-->
-
-<!--    let currentPatientId = null;-->
-
-<!--    window.onload = function () {-->
-<!--        const patientList = document.getElementById('patient-list');-->
-<!--        patients.forEach(patient => {-->
-<!--            const patientItem = document.createElement('div');-->
-<!--            patientItem.classList.add('patient-item');-->
-
-<!--            patientItem.innerHTML = `-->
-<!--                <h4>${patient.name} (ID: ${patient.id})</h4>-->
-<!--                <div style="display: flex; gap: 1cm;">-->
-<!--                    <button class="view-button" onclick="viewPDF('${patient.pdfPath}')">View PDF</button>-->
-<!--                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update PDF</button>-->
-<!--                </div>-->
-<!--            `;-->
-<!--            patientList.appendChild(patientItem);-->
-<!--        });-->
-<!--    };-->
-
-<!--    // View PDF in a new window-->
-<!--    function viewPDF(pdfPath) {-->
-<!--        const newWindow = window.open('');-->
-<!--        newWindow.document.write(`-->
-<!--            <!DOCTYPE html>-->
-<!--            <html lang="en">-->
-<!--            <head>-->
-<!--                <title>View PDF</title>-->
-<!--                <style>-->
-<!--                    body { margin: 0; }-->
-<!--                    embed { display: block; width: 100%; height: 100vh; }-->
-<!--                </style>-->
-<!--            </head>-->
-<!--            <body>-->
-<!--                <embed src="${pdfPath}" type="application/pdf">-->
-<!--            </body>-->
-<!--            </html>-->
-<!--        `);-->
-<!--    }-->
-
-<!--    // Show modal for editing the PDF (enter text)-->
-<!--    function showEditModal(patientId) {-->
-<!--        currentPatientId = patientId;-->
-<!--        const modal = document.getElementById('edit-pdf-modal');-->
-<!--        modal.style.display = 'block';-->
-<!--    }-->
-
-<!--    // Close the modal-->
-<!--    function closeEditModal() {-->
-<!--        const modal = document.getElementById('edit-pdf-modal');-->
-<!--        modal.style.display = 'none';-->
-<!--        currentPatientId = null;-->
-<!--    }-->
-
-<!--    // Append entered text to the PDF using jsPDF-->
-<!--    function updatePDF() {-->
-<!--        const text = document.getElementById('pdf-text-input').value;-->
-<!--        if (text.trim() === "") {-->
-<!--            alert("Please enter text to update the PDF.");-->
-<!--            return;-->
-<!--        }-->
-
-<!--        // Make a call to update the PDF via backend-->
-<!--        fetch(`/update-pdf?pid=${currentPatientId}&newText=${encodeURIComponent(text)}`, {-->
-<!--            method: 'POST',-->
-<!--        })-->
-<!--        .then(response => response.text())-->
-<!--        .then(data => {-->
-<!--            alert("PDF updated successfully!");-->
-<!--            closeEditModal();-->
-<!--            viewPDF(`/patient/${currentPatientId}/pdf`);-->
-<!--        })-->
-<!--        .catch(error => {-->
-<!--            alert("Error updating PDF: " + error.message);-->
-<!--        });-->
-<!--    }-->
-<!--</script>-->
-
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!-- jsPDF Library -->
     <style>
         /* General Page Styling */
         body {
@@ -286,6 +28,28 @@
             text-align: center;
             font-size: 24px;
             font-weight: bold;
+            position: relative;
+        }
+
+        /* Logout Button */
+        .logout-container {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+
+        .logout-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #d32f2f;
         }
 
         /* Main Content */
@@ -336,7 +100,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .view-button:hover {
+        .view-button:hover, .update-button:hover {
             background-color: #89c2d9;
         }
 
@@ -360,6 +124,23 @@
             background-color: #89c2d9;
         }
 
+        /* Loading Animation */
+        .loading {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0073e6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* PDF Viewer */
         .pdf-viewer {
             text-align: center;
@@ -376,7 +157,6 @@
             color: #777;
             font-size: 16px;
         }
-
 
         .form-container {
             display: flex;
@@ -437,15 +217,19 @@
 <body>
 
 <!-- Navbar -->
-<div class="navbar">Electronic Health Record System</div>
+<div class="navbar">
+    Electronic Health Record System
+    <div class="logout-container">
+        <button class="logout-button" id="logoutButton">Logout</button>
+    </div>
+</div>
 
 <!-- Main Container -->
 <div class="main-container">
     <!-- Patient ID Input with + Button -->
     <div class="form-container">
         <input type="text" id="patient-id" placeholder="Enter Patient ID">
-        <button class="add-small-button" onclick="addRecord()">+</button>
-        <button onclick="viewPDFByID()">View PDF</button>
+        <button class="add-button" onclick="addRequest()">Add Request</button>
     </div>
 
     <!-- Patient Records List -->
@@ -453,6 +237,8 @@
         <!-- List of all patient records will be dynamically generated here -->
     </div>
 
+    <!-- Loading Animation -->
+    <div class="loading" id="loading"></div>
 
     <!-- Update PDF Form (Text Editing) -->
     <div id="edit-pdf-modal">
@@ -460,42 +246,59 @@
         <textarea id="pdf-text-input" placeholder="Enter text to append to the PDF"></textarea>
         <button onclick="updatePDF()">Save Changes</button>
         <button onclick="closeEditModal()">Cancel</button>
-
     </div>
 </div>
 
 <script>
-
     let patients = []; // This will be populated with data from the backend.
     let currentPatientId = null;
 
+    // Show loading animation
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+    }
+
+    // Hide loading animation
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
     window.onload = function () {
         // Fetch the list of patients from the backend
-        fetch('/patients/all')
-            .then(response => response.json())
-            .then(data => {
-                patients = data; // Store the fetched patients data
-                populatePatientList();
-            })
-            .catch(error => {
-                console.error('Error fetching patients:', error);
-            });
+        showLoading();
+        fetch('/fabric/doctor/patients', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            patients = data; // Store the fetched patients data
+            populatePatientList();
+        })
+        .catch(error => {
+            console.error('Error fetching patients:', error);
+        })
+        .finally(() => {
+            hideLoading();
+        });
     };
 
     // Populate the patient list dynamically
     function populatePatientList() {
-
         const patientList = document.getElementById('patient-list');
+        patientList.innerHTML = ''; // Clear any existing content
         patients.forEach(patient => {
             const patientItem = document.createElement('div');
             patientItem.classList.add('patient-item');
 
             patientItem.innerHTML = `
-                <h4>${patient.name} (ID: ${patient.id})</h4>
-
+                <h4>Patient ID: ${patient.pid}</h4>
                 <div style="display: flex; gap: 1cm;">
-                    <button class="view-button" onclick="viewPDF('${patient.pdfPath}')">View PDF</button>
-                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update PDF</button>
+                    <button class="view-button" onclick="viewPDF('${patient.pid}')">View PDF</button>
+                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update</button>
                 </div>
             `;
             patientList.appendChild(patientItem);
@@ -503,24 +306,11 @@
     }
 
     // View PDF in a new window
-    function viewPDF(pdfPath) {
-        const newWindow = window.open('');
-        newWindow.document.write(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <title>View PDF</title>
-                <style>
-                    body { margin: 0; }
-                    embed { display: block; width: 100%; height: 100vh; }
-                </style>
-            </head>
-            <body>
-
-                <embed src="${pdfPath}" type="application/pdf" style="width: 100%; height: 100vh;">
-            </body>
-            </html>
-        `);
+    function viewPDF(patientId) {
+        showLoading();
+        localStorage.setItem('patientId', patientId);
+        window.location.href = '/view-pdf.html';
+        hideLoading();
     }
 
     // Show modal for editing the PDF (enter text)
@@ -545,20 +335,65 @@
             return;
         }
 
+        showLoading();
         // Make a call to update the PDF via backend
-        fetch(`/update-pdf?pid=${currentPatientId}&newText=${encodeURIComponent(text)}`, {
+        fetch(`/fabric/doctor/update-pdf?pid=${currentPatientId}&newText=${encodeURIComponent(text)}`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
         })
         .then(response => response.text())
         .then(data => {
             alert("PDF updated successfully!");
             closeEditModal();
-            viewPDF(`/patient/${currentPatientId}/pdf`);
+            viewPDF(currentPatientId);
         })
         .catch(error => {
             alert("Error updating PDF: " + error.message);
+        })
+        .finally(() => {
+            hideLoading();
         });
     }
+
+    // Add request to a patient
+    function addRequest() {
+        const patientId = document.getElementById('patient-id').value;
+        if (patientId.trim() === "") {
+            alert("Please enter a patient ID.");
+            return;
+        }
+
+        showLoading();
+        // Make a call to add the request via backend
+        fetch(`/fabric/doctor/add-request?pid=${patientId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("Request added successfully!");
+            // Optionally, refresh the patient list
+            window.location.reload();
+        })
+        .catch(error => {
+            alert("Error adding request: " + error.message);
+        })
+        .finally(() => {
+            hideLoading();
+        });
+    }
+
+    // Handle logout button click
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('jwt'); // Remove the JWT from local storage
+        window.location.href = '/login.html'; // Redirect to the login page
+    });
 </script>
 
 </body>

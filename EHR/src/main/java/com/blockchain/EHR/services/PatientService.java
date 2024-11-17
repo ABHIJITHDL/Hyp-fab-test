@@ -18,7 +18,7 @@ public class PatientService {
 
     public List<String> getDoctors(String pid,String mspId) throws JsonProcessingException {
         String[] args = {pid};
-        String response = fabricService.submitTransaction("mychannel","ehr","getAllEHRRecordsForPatient",args,pid,mspId);
+        String response = fabricService.submitTransaction("mychannel","ehr","getAllEHRRecordByPatient",args,pid,mspId);
         System.out.println("response: "+response);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(response);

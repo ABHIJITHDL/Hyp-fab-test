@@ -2,8 +2,11 @@ package com.blockchain.EHR.controller;
 
 import com.blockchain.EHR.jwt.CustomUserDetails;
 import com.blockchain.EHR.jwt.JwtUtils;
+import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.services.FabricService;
 import com.blockchain.EHR.services.FabricUserRegistration;
+import com.blockchain.EHR.services.PdfService;
+import com.itextpdf.kernel.pdf.annot.Pdf3DAnnotation;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.Date;
@@ -24,12 +28,13 @@ import java.util.Date;
 @RestController
 @RequestMapping("/fabric")
 public class FabricController {
-
+    private final PdfService pdfService;
     private final FabricService fabricService;
     private final FabricUserRegistration fabricUserRegistration;
     private final JwtUtils jwtUtils;
 
-    public FabricController(FabricService fabricService, FabricUserRegistration fabricUserRegistration, JwtUtils jwtUtils) {
+    public FabricController(PdfService pdfService, FabricService fabricService, FabricUserRegistration fabricUserRegistration, JwtUtils jwtUtils) {
+        this.pdfService = pdfService;
         this.fabricService = fabricService;
         this.fabricUserRegistration = fabricUserRegistration;
         this.jwtUtils = jwtUtils;
@@ -37,7 +42,9 @@ public class FabricController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password, @RequestParam String mspId) {
+    public ResponseEntity<String> login(@RequestParam String username,
+                                        @RequestParam String password,
+                                        @RequestParam String mspId) {
         if (fabricUserRegistration.authenticateUser(username, password, mspId)) {
             System.out.println("FabricUserRegistration works");
             CustomUserDetails userDetails = new CustomUserDetails(username, password, mspId, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
@@ -55,7 +62,8 @@ public class FabricController {
     public String submitTransaction(HttpServletRequest request,
                                     @RequestParam String channelName,
                                     @RequestParam String chaincodeName,
-                                    @RequestParam String functionName, @RequestParam String... args){
+                                    @RequestParam String functionName,
+                                    @RequestParam String... args){
         String jwt = jwtUtils.getJwtFromHeader(request);
         System.out.println("jwt received");
         String username = jwtUtils.getUserNameFromJwtToken(jwt);
@@ -83,9 +91,26 @@ public class FabricController {
 
 
     @PostMapping("/register")
-    public String enrollUser(HttpServletRequest request,@RequestParam String username, @RequestParam String password) {
+    public String enrollUser(HttpServletRequest request,
+                             @RequestParam String username,
+                             @RequestParam String password,
+                             @RequestParam(value = "file",required = false ) MultipartFile pdf) {
+
         String jwt = jwtUtils.getJwtFromHeader(request);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+        String id = jwtUtils.getUserNameFromJwtToken(jwt);
+        System.out.println("Register controller");
+        if(pdf!=null || !pdf.isEmpty()){
+            if(!"Org2MSP".equals(mspId) )
+                return "Only Patient Admin can Upload pdf";
+            try {
+                Patient patient = pdfService.upload(username, pdf);
+            } catch (Exception e) {
+                System.err.println("Error during PDF upload: " + e.getMessage());
+                return "Error During uploading pdf";
+            }
+        }
+
         System.out.println("Received");
         if(fabricUserRegistration.addUser(username, password,mspId))
             return "User registered successfully";
