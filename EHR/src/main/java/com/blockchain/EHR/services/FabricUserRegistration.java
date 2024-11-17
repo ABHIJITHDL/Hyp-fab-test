@@ -32,33 +32,33 @@ import java.util.Properties;
 @Service
 public class FabricUserRegistration {
 
-    private static final String CA_URL = "https://tlsca.org1.example.com:7054"; // Your CA URL
-    private static final String ORG_NAME = "org1.example.com";
     private static final String ADMIN_NAME = "admin";
     private static final String ADMIN_PASSWORD = "adminpw";
 
-    // Path to the CA's TLS certificate
-    private static final String CA_CERT_PATH = Paths.get("artifacts", "channel", "crypto-config", "peerOrganizations", "org1.example.com", "tlsca", "tlsca.org1.example.com-cert.pem").toString();
+//    // Path to the CA's TLS certificate
+//    private static final String CA_CERT_PATH = Paths.get("artifacts", "channel", "crypto-config", "peerOrganizations", "org1.example.com", "tlsca", "tlsca.org1.example.com-cert.pem").toString();
+//
+//    // Directory where user certificates and keys will be stored
+//    private static final String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/org1/wallet";
 
-    // Directory where user certificates and keys will be stored
-    private static final String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/org1/wallet";
-
-    public boolean addUser(String username, String password) {
+    public boolean addUser(String username, String password,String mspId) {
         try {
-            // Step 1: Create a CA client for interacting with the CA
+            String organization = getOrganizationFromMSP(mspId);
+            Map<String, String> caConfig = getCAConfig(organization);
+            String CA_CERT_CONTENT = caConfig.get("CA_CERT_CONTENT");
+            String CA_URL = caConfig.get("CA_URL");
             Properties props = new Properties();
-            props.put("pemFile", CA_CERT_PATH);
+            props.put("pemBytes", CA_CERT_CONTENT.getBytes());
             props.put("allowAllHostNames", "true"); // Not recommended for production
 
             HFCAClient caClient = HFCAClient.createNewInstance(CA_URL, props);
             caClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
-
             // Step 2: Enroll the admin user to interact with the CA
             Enrollment adminEnrollment = caClient.enroll(ADMIN_NAME, ADMIN_PASSWORD);
-            User admin = new FabricUser(ADMIN_NAME, ORG_NAME, adminEnrollment);
+            User admin = new FabricUser(ADMIN_NAME, getOrganizationFromMSP(mspId), adminEnrollment);
             // Step 3: Register and enroll the new user
 
-            registerAndEnrollUser(caClient, admin, username, password);
+            registerAndEnrollUser(caClient, admin, username, password,mspId);
             return true;
         } catch (Exception e) {
             e.getMessage();
@@ -66,9 +66,14 @@ public class FabricUserRegistration {
         }
     }
 
-    public static boolean authenticateUser(String username, String password, String organization) {
-        try {
+    public String getOrganizationFromMSP(String mspId){
+        return mspId.substring(0, 1).toLowerCase() + mspId.substring(1, mspId.length() - 3);
+    }
 
+    public boolean authenticateUser(String username, String password, String msp) {
+        try {
+            String organization = getOrganizationFromMSP(msp);
+            System.out.println(organization);
             Map<String, String> caConfig = getCAConfig(organization);
             String CA_CERT_CONTENT = caConfig.get("CA_CERT_CONTENT");
             String CA_URL = caConfig.get("CA_URL");
@@ -124,11 +129,11 @@ public class FabricUserRegistration {
         }
         return caConfig;
     }
-    private static void registerAndEnrollUser(HFCAClient caClient, User admin, String username, String password) throws Exception {
+    private  void registerAndEnrollUser(HFCAClient caClient, User admin, String username, String password,String mspId) throws Exception {
         // Step 1: Register the user with the CA
-        RegistrationRequest registrationRequest = new RegistrationRequest(username, "org1.department1");
+        RegistrationRequest registrationRequest = new RegistrationRequest(username);
         registrationRequest.setSecret(password);
-
+        System.out.println("Registration request created");
         String enrollmentSecret = caClient.register(registrationRequest, admin);
         System.out.println("Successfully registered user: " + username);
         // Step 2: Enroll the registered user to get the enrollment certificate
@@ -137,17 +142,18 @@ public class FabricUserRegistration {
 
         // Save the user's private key and certificate
 
-        saveUserCredentials(username, userEnrollment, "Org1MSP");
+        saveUserCredentials(username, userEnrollment, mspId);
 
     }
 
-    private static void saveUserCredentials(String username, Enrollment enrollment, String mspId) throws Exception {
+    private  void saveUserCredentials(String username, Enrollment enrollment, String mspId) throws Exception {
+        String org = getOrganizationFromMSP(mspId);
         // Define the wallet directory
+        String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/"+org+"/wallet";
         File walletDir = new File(WALLET_PATH);
         if (!walletDir.exists()) {
             walletDir.mkdirs();
         }
-
         // Construct the path for the user's JSON wallet entry
         File walletFile = Paths.get(WALLET_PATH, username + ".id").toFile();
 

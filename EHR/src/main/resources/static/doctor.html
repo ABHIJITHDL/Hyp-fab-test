@@ -336,11 +336,48 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .view-button:hover, .update-button:hover {
+        .view-button:hover {
             background-color: #89c2d9;
         }
 
-        /* Input and Button Styling */
+        /* Add Button Styling */
+        .add-button {
+            background-color: #068fbc; /* Light blue (same color as 'View PDF') */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-button:hover {
+            background-color: #89c2d9;
+        }
+
+        /* PDF Viewer */
+        .pdf-viewer {
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            height: 500px;
+            overflow-y: scroll; /* Allow vertical scrolling */
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+
+        .pdf-placeholder {
+            color: #777;
+            font-size: 16px;
+        }
+
+
         .form-container {
             display: flex;
             justify-content: center;
@@ -416,16 +453,19 @@
         <!-- List of all patient records will be dynamically generated here -->
     </div>
 
+
     <!-- Update PDF Form (Text Editing) -->
     <div id="edit-pdf-modal">
         <h3>Edit PDF for Patient</h3>
         <textarea id="pdf-text-input" placeholder="Enter text to append to the PDF"></textarea>
         <button onclick="updatePDF()">Save Changes</button>
         <button onclick="closeEditModal()">Cancel</button>
+
     </div>
 </div>
 
 <script>
+
     let patients = []; // This will be populated with data from the backend.
     let currentPatientId = null;
 
@@ -444,6 +484,7 @@
 
     // Populate the patient list dynamically
     function populatePatientList() {
+
         const patientList = document.getElementById('patient-list');
         patients.forEach(patient => {
             const patientItem = document.createElement('div');
@@ -451,6 +492,7 @@
 
             patientItem.innerHTML = `
                 <h4>${patient.name} (ID: ${patient.id})</h4>
+
                 <div style="display: flex; gap: 1cm;">
                     <button class="view-button" onclick="viewPDF('${patient.pdfPath}')">View PDF</button>
                     <button class="update-button" onclick="showEditModal('${patient.id}')">Update PDF</button>
@@ -474,7 +516,8 @@
                 </style>
             </head>
             <body>
-                <embed src="${pdfPath}" type="application/pdf">
+
+                <embed src="${pdfPath}" type="application/pdf" style="width: 100%; height: 100vh;">
             </body>
             </html>
         `);
@@ -520,4 +563,3 @@
 
 </body>
 </html>
-

@@ -54,7 +54,7 @@ public class FabricService {
             byte[] result = contract.submitTransaction(functionName, args);
             return new String(result, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            e.getMessage();
+            e.printStackTrace();
             return "Transaction failed";
         } finally {
             if (gatewayChannelPair != null) {

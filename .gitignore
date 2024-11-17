@@ -132,7 +132,9 @@ artifacts/channel/mychannel.tx
 artifacts/channel/genesis.block
 artifacts/channel/Org1MSPanchors.tx
 artifacts/channel/Org2MSPanchors.tx
-artifacts/channel/crypto-config
+EHR/src/main/resources/static/connection-profiles/org1/wallet/
+EHR/src/main/resources/static/connection-profiles/org2/wallet/
+/artifacts/channel/crypto-config/*
 fabric-client-kv-org1
 /package-lock.json
 crypto/*

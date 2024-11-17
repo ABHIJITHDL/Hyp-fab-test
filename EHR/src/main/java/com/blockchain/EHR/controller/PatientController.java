@@ -37,22 +37,8 @@ public class PatientController {
     @Autowired
     PatientRepository patientRepository;
 
-    @PostMapping("/patient/upload")
-    public ResponseEntity<?> uploadPdf(@RequestParam("pid")String pid,
-                                       @RequestParam("eid")String eid,
-                                       @RequestParam("file")MultipartFile pdf){
-        System.out.println("Received upload request for PID: " + pid + ", EID: " + eid);
-        try {
-            Patient patient = pdfService.upload(pid, eid, pdf);
-            System.out.println("PDF uploaded successfully: " + patient.getPatientId());
-            return new ResponseEntity<>(patient, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error during PDF upload: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
-    @GetMapping("/patient/{pid}/pdf")
+    @GetMapping("/patient/pdf")
     public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
         Optional<Patient> patientOptional = patientRepository.findById(pid);
 
@@ -68,26 +54,6 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
-
-@PostMapping("/update-pdf")
-public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam String newText) {
-    try {
-        pdfService.updatePdf(pid, newText);
-        return ResponseEntity.ok("PDF updated successfully!");
-    } catch (IOException e) {
-        return ResponseEntity.status(500).body("Error updating PDF: " + e.getMessage());
-    }
-}
-
-//    @GetMapping("/patients/all")
-//    List<String>getAll(){
-//        List<Patient>getAll=patientRepository.findAll();
-//        List<String>pids=new ArrayList<>();
-//        for (Patient patient:getAll
-//             ) {
-//            pids.add(getAll.getPatientId())
-//        }
-//    }
 
 }
 

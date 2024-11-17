@@ -42,14 +42,15 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))  // Handle unauthorized access
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless sessions
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/frontend/**")).permitAll()  // Permit access to /frontend/**
-                        .requestMatchers("/fabric/login/**").permitAll()
-                        .requestMatchers("/fabric/login").permitAll()
-                        .anyRequest().permitAll()
+                                .requestMatchers("/fabric/login/**").permitAll()
+                                .requestMatchers("/*.html", "/*.css", "/*.js").permitAll()  // Allow access to static files
+//                              .requestMatchers("/fabric/login").permitAll()
+                                .anyRequest().authenticated()
                 );
         http.csrf(csrf -> csrf
                 .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/**"))
                 .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/login")));
+        http.cors(Customizer.withDefaults());
         // Ensure the authTokenFilter does not interfere with /fabric/login
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
