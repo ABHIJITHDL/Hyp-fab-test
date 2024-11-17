@@ -21,6 +21,8 @@ import com.itextpdf.layout.element.Paragraph;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +54,6 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
 }
 

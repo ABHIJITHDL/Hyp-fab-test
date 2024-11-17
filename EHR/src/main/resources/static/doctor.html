@@ -1,3 +1,260 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Doctor Dashboard</title>-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> &lt;!&ndash; jsPDF Library &ndash;&gt;-->
+<!--    <style>-->
+<!--        /* General Page Styling */-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            background-image: linear-gradient(to right, #83a4d4, #b6fbff);-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            color: #333;-->
+<!--            display: flex;-->
+<!--            flex-direction: column;-->
+<!--            align-items: center;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        /* Navigation Bar */-->
+<!--        .navbar {-->
+<!--            width: 100%;-->
+<!--            background-color: #7791a8;-->
+<!--            color: white;-->
+<!--            padding: 15px 0;-->
+<!--            text-align: center;-->
+<!--            font-size: 24px;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+
+<!--        /* Main Content */-->
+<!--        .main-container {-->
+<!--            display: flex;-->
+<!--            flex-direction: column;-->
+<!--            padding: 20px;-->
+<!--            width: 90%;-->
+<!--            max-width: 1200px;-->
+<!--            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);-->
+<!--            border-radius: 8px;-->
+<!--            background-color: #fff;-->
+<!--        }-->
+
+<!--        /* Patient List Styling */-->
+<!--        .patient-list {-->
+<!--            margin-top: 20px;-->
+<!--            width: 100%;-->
+<!--            text-align: left;-->
+<!--        }-->
+
+<!--        .patient-item {-->
+<!--            padding: 15px;-->
+<!--            margin-bottom: 10px;-->
+<!--            background-color: #f9f9f9;-->
+<!--            border: 1px solid #ddd;-->
+<!--            border-radius: 4px;-->
+<!--            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .patient-item h4 {-->
+<!--            margin: 0;-->
+<!--            font-size: 18px;-->
+<!--            color: #068fbc;-->
+<!--        }-->
+
+<!--        .view-button, .update-button {-->
+<!--            background-color: #068fbc; /* Light blue */-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 10px 15px;-->
+<!--            font-size: 14px;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);-->
+<!--        }-->
+
+<!--        .view-button:hover, .update-button:hover {-->
+<!--            background-color: #89c2d9;-->
+<!--        }-->
+
+<!--        /* Input and Button Styling */-->
+<!--        .form-container {-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+
+<!--        .form-container input {-->
+<!--            width: 60%;-->
+<!--            max-width: 400px;-->
+<!--            padding: 10px;-->
+<!--            font-size: 16px;-->
+<!--            border: 1px solid #ddd;-->
+<!--            border-radius: 4px;-->
+<!--        }-->
+
+<!--        .form-container button {-->
+<!--            background-color: #068fbc; /* Light blue */-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 10px 20px;-->
+<!--            font-size: 16px;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);-->
+<!--        }-->
+
+<!--        .form-container button:hover {-->
+<!--            background-color: #89c2d9;-->
+<!--        }-->
+
+<!--        /* Text Area for Editing PDF */-->
+<!--        #edit-pdf-modal {-->
+<!--            display: none;-->
+<!--            text-align: center;-->
+<!--            padding: 20px;-->
+<!--            border: 1px solid #ddd;-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+
+<!--        #edit-pdf-modal textarea {-->
+<!--            width: 80%;-->
+<!--            height: 150px;-->
+<!--            margin-top: 10px;-->
+<!--            padding: 10px;-->
+<!--            font-size: 14px;-->
+<!--            border: 1px solid #ddd;-->
+<!--            border-radius: 4px;-->
+<!--        }-->
+
+<!--        #edit-pdf-modal button {-->
+<!--            margin-top: 10px;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--&lt;!&ndash; Navbar &ndash;&gt;-->
+<!--<div class="navbar">Electronic Health Record System</div>-->
+
+<!--&lt;!&ndash; Main Container &ndash;&gt;-->
+<!--<div class="main-container">-->
+<!--    &lt;!&ndash; Patient ID Input with + Button &ndash;&gt;-->
+<!--    <div class="form-container">-->
+<!--        <input type="text" id="patient-id" placeholder="Enter Patient ID">-->
+<!--        <button class="add-small-button" onclick="addRecord()">+</button>-->
+<!--        <button onclick="viewPDFByID()">View PDF</button>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Patient Records List &ndash;&gt;-->
+<!--    <div class="patient-list" id="patient-list">-->
+<!--        &lt;!&ndash; List of all patient records will be dynamically generated here &ndash;&gt;-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Update PDF Form (Text Editing) &ndash;&gt;-->
+<!--    <div id="edit-pdf-modal">-->
+<!--        <h3>Edit PDF for Patient</h3>-->
+<!--        <textarea id="pdf-text-input" placeholder="Enter text to append to the PDF"></textarea>-->
+<!--        <button onclick="updatePDF()">Save Changes</button>-->
+<!--        <button onclick="closeEditModal()">Cancel</button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    const patients = [-->
+<!--        { id: 'P001', name: 'John Doe', pdfPath: '/patient/P001/pdf' },-->
+<!--        { id: 'P002', name: 'Jane Smith', pdfPath: '/patient/P002/pdf' },-->
+<!--        { id: 'P003', name: 'Alice Brown', pdfPath: '/patient/P003/pdf' },-->
+<!--    ];-->
+
+<!--    let currentPatientId = null;-->
+
+<!--    window.onload = function () {-->
+<!--        const patientList = document.getElementById('patient-list');-->
+<!--        patients.forEach(patient => {-->
+<!--            const patientItem = document.createElement('div');-->
+<!--            patientItem.classList.add('patient-item');-->
+
+<!--            patientItem.innerHTML = `-->
+<!--                <h4>${patient.name} (ID: ${patient.id})</h4>-->
+<!--                <div style="display: flex; gap: 1cm;">-->
+<!--                    <button class="view-button" onclick="viewPDF('${patient.pdfPath}')">View PDF</button>-->
+<!--                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update PDF</button>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            patientList.appendChild(patientItem);-->
+<!--        });-->
+<!--    };-->
+
+<!--    // View PDF in a new window-->
+<!--    function viewPDF(pdfPath) {-->
+<!--        const newWindow = window.open('');-->
+<!--        newWindow.document.write(`-->
+<!--            <!DOCTYPE html>-->
+<!--            <html lang="en">-->
+<!--            <head>-->
+<!--                <title>View PDF</title>-->
+<!--                <style>-->
+<!--                    body { margin: 0; }-->
+<!--                    embed { display: block; width: 100%; height: 100vh; }-->
+<!--                </style>-->
+<!--            </head>-->
+<!--            <body>-->
+<!--                <embed src="${pdfPath}" type="application/pdf">-->
+<!--            </body>-->
+<!--            </html>-->
+<!--        `);-->
+<!--    }-->
+
+<!--    // Show modal for editing the PDF (enter text)-->
+<!--    function showEditModal(patientId) {-->
+<!--        currentPatientId = patientId;-->
+<!--        const modal = document.getElementById('edit-pdf-modal');-->
+<!--        modal.style.display = 'block';-->
+<!--    }-->
+
+<!--    // Close the modal-->
+<!--    function closeEditModal() {-->
+<!--        const modal = document.getElementById('edit-pdf-modal');-->
+<!--        modal.style.display = 'none';-->
+<!--        currentPatientId = null;-->
+<!--    }-->
+
+<!--    // Append entered text to the PDF using jsPDF-->
+<!--    function updatePDF() {-->
+<!--        const text = document.getElementById('pdf-text-input').value;-->
+<!--        if (text.trim() === "") {-->
+<!--            alert("Please enter text to update the PDF.");-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Make a call to update the PDF via backend-->
+<!--        fetch(`/update-pdf?pid=${currentPatientId}&newText=${encodeURIComponent(text)}`, {-->
+<!--            method: 'POST',-->
+<!--        })-->
+<!--        .then(response => response.text())-->
+<!--        .then(data => {-->
+<!--            alert("PDF updated successfully!");-->
+<!--            closeEditModal();-->
+<!--            viewPDF(`/patient/${currentPatientId}/pdf`);-->
+<!--        })-->
+<!--        .catch(error => {-->
+<!--            alert("Error updating PDF: " + error.message);-->
+<!--        });-->
+<!--    }-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +262,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!-- jsPDF Library -->
     <style>
         /* General Page Styling */
         body {
@@ -67,7 +325,7 @@
             color: #068fbc;
         }
 
-        .view-button {
+        .view-button, .update-button {
             background-color: #068fbc; /* Light blue */
             color: white;
             border: none;
@@ -119,11 +377,12 @@
             font-size: 16px;
         }
 
+
         .form-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px; /* Space between elements */
+            gap: 10px;
             margin-top: 20px;
         }
 
@@ -151,25 +410,28 @@
             background-color: #89c2d9;
         }
 
-        /* Small horizontal Add button next to Patient ID input */
-        .add-small-button {
-            background-color: #068fbc; /* Light blue (same color as 'View PDF') */
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 12px; /* Smaller than View PDF button */
+        /* Text Area for Editing PDF */
+        #edit-pdf-modal {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+
+        #edit-pdf-modal textarea {
+            width: 80%;
+            height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .add-small-button:hover {
-            background-color: #89c2d9;
+        #edit-pdf-modal button {
+            margin-top: 10px;
         }
-
     </style>
 </head>
 <body>
@@ -191,23 +453,38 @@
         <!-- List of all patient records will be dynamically generated here -->
     </div>
 
-    <!-- PDF Viewer -->
-    <div class="pdf-viewer" id="pdf-viewer">
-        <!-- PDF Content Placeholder -->
-        <p class="pdf-placeholder">Select a patient to view their record.</p>
+
+    <!-- Update PDF Form (Text Editing) -->
+    <div id="edit-pdf-modal">
+        <h3>Edit PDF for Patient</h3>
+        <textarea id="pdf-text-input" placeholder="Enter text to append to the PDF"></textarea>
+        <button onclick="updatePDF()">Save Changes</button>
+        <button onclick="closeEditModal()">Cancel</button>
+
     </div>
 </div>
 
 <script>
-    // Mock patient data for demo purposes
-    const patients = [
-        { id: 'P001', name: 'John Doe', pdfPath: 'file:///C:/record/bubblesort.pdf' },
-        { id: 'P002', name: 'Jane Smith', pdfPath: 'path/to/P002.pdf' },
-        { id: 'P003', name: 'Alice Brown', pdfPath: 'path/to/P003.pdf' },
-    ];
 
-    // Load all patients' information on page load
+    let patients = []; // This will be populated with data from the backend.
+    let currentPatientId = null;
+
     window.onload = function () {
+        // Fetch the list of patients from the backend
+        fetch('/patients/all')
+            .then(response => response.json())
+            .then(data => {
+                patients = data; // Store the fetched patients data
+                populatePatientList();
+            })
+            .catch(error => {
+                console.error('Error fetching patients:', error);
+            });
+    };
+
+    // Populate the patient list dynamically
+    function populatePatientList() {
+
         const patientList = document.getElementById('patient-list');
         patients.forEach(patient => {
             const patientItem = document.createElement('div');
@@ -215,32 +492,18 @@
 
             patientItem.innerHTML = `
                 <h4>${patient.name} (ID: ${patient.id})</h4>
-                <button class="view-button" onclick="viewPDFInNewPage('${patient.pdfPath}')">View PDF</button>
-            `;
 
+                <div style="display: flex; gap: 1cm;">
+                    <button class="view-button" onclick="viewPDF('${patient.pdfPath}')">View PDF</button>
+                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update PDF</button>
+                </div>
+            `;
             patientList.appendChild(patientItem);
         });
-    };
-
-    // Function to display PDF in the viewer for a specific ID
-    function viewPDFByID() {
-        const patientId = document.getElementById('patient-id').value;
-        const pdfViewer = document.getElementById('pdf-viewer');
-
-        const patient = patients.find(p => p.id === patientId);
-
-        if (patient) {
-            // Embed the PDF with full interaction (no restrictions)
-            pdfViewer.innerHTML = `
-                <embed src="${patient.pdfPath}" type="application/pdf" width="100%" height="100%">
-            `;
-        } else {
-            pdfViewer.innerHTML = "<p class='pdf-placeholder'>No record found for the entered Patient ID.</p>";
-        }
     }
 
-    // Function to view PDF in a new page (no restrictions)
-    function viewPDFInNewPage(pdfPath) {
+    // View PDF in a new window
+    function viewPDF(pdfPath) {
         const newWindow = window.open('');
         newWindow.document.write(`
             <!DOCTYPE html>
@@ -253,16 +516,48 @@
                 </style>
             </head>
             <body>
+
                 <embed src="${pdfPath}" type="application/pdf" style="width: 100%; height: 100vh;">
             </body>
             </html>
         `);
     }
 
-    // Placeholder for "Add Record" button
-    function addRecord() {
-        alert('Redirecting to Add Record Form');
-        // Replace with redirection or modal code as needed
+    // Show modal for editing the PDF (enter text)
+    function showEditModal(patientId) {
+        currentPatientId = patientId;
+        const modal = document.getElementById('edit-pdf-modal');
+        modal.style.display = 'block';
+    }
+
+    // Close the modal
+    function closeEditModal() {
+        const modal = document.getElementById('edit-pdf-modal');
+        modal.style.display = 'none';
+        currentPatientId = null;
+    }
+
+    // Append entered text to the PDF using jsPDF
+    function updatePDF() {
+        const text = document.getElementById('pdf-text-input').value;
+        if (text.trim() === "") {
+            alert("Please enter text to update the PDF.");
+            return;
+        }
+
+        // Make a call to update the PDF via backend
+        fetch(`/update-pdf?pid=${currentPatientId}&newText=${encodeURIComponent(text)}`, {
+            method: 'POST',
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert("PDF updated successfully!");
+            closeEditModal();
+            viewPDF(`/patient/${currentPatientId}/pdf`);
+        })
+        .catch(error => {
+            alert("Error updating PDF: " + error.message);
+        });
     }
 </script>
 
