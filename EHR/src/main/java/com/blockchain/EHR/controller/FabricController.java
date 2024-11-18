@@ -100,7 +100,7 @@ public class FabricController {
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         String id = jwtUtils.getUserNameFromJwtToken(jwt);
         System.out.println("Register controller");
-        if(pdf!=null || !pdf.isEmpty()){
+        if(pdf!=null){
             if(!"Org2MSP".equals(mspId) )
                 return "Only Patient Admin can Upload pdf";
             try {

@@ -172,7 +172,7 @@
         }
 
         /* Hide Doctor Actions and Accepted Doctors initially */
-        #doctor-container, #doctor-list {
+        #doctor-container, #doctor-list, #pending-list {
             display: none;
         }
     </style>
@@ -200,7 +200,7 @@
                 <option value="Pending">Pending</option>
             </select>
         </form>
-        <button class="refresh-button" onclick="fetchDoctorData()">Refresh</button>
+        <button class="refresh-button" onclick="refreshData()">Refresh</button>
         <div class="loading" id="loading"></div>
     </div>
 
@@ -210,57 +210,88 @@
         <div id="doctor-list-content"></div>
     </div>
 
+    <!-- Pending Requests Container -->
+    <div class="container" id="pending-list">
+        <h2>Pending Requests</h2>
+        <div id="pending-list-content"></div>
+    </div>
+
     <!-- Doctor Actions Container -->
     <div class="container" id="doctor-container">
         <h2>Doctor Actions</h2>
         <div class="doctor-actions-row">
-            <!-- Doctor ID Display -->
-            <div class="doctor-id-display" id="doctor-id">Doctor ID: D12345</div>
-            <!-- Accept and Revoke Buttons -->
-            <button class="doctor-button accept-button" onclick="handleAction('Accept')">Accept</button>
-            <button class="doctor-button revoke-button" onclick="handleAction('Revoke')">Revoke</button>
         </div>
     </div>
 
 </div>
 
 <script>
-    let dataFetched = false; // Flag to check if data has already been fetched
+    let dataFetched = {
+        accepted: false,
+        pending: false
+    }; // Flags to check if data has already been fetched
 
     // Toggle visibility of Doctor Actions and fetch accepted doctors based on status selection
     function toggleDoctorActions() {
         const status = document.getElementById("status").value;
         const doctorContainer = document.getElementById("doctor-container");
         const doctorList = document.getElementById("doctor-list");
+        const pendingList = document.getElementById("pending-list");
 
         if (status === "Accepted") {
             doctorContainer.style.display = "none";
             doctorList.style.display = "block";
-            if (!dataFetched) {
+            pendingList.style.display = "none";
+            if (!dataFetched.accepted) {
                 fetchDoctorData();
             }
         } else if (status === "Pending") {
-            doctorContainer.style.display = "block";
+            doctorContainer.style.display = "none";
             doctorList.style.display = "none";
+            pendingList.style.display = "block";
+            if (!dataFetched.pending) {
+                fetchPendingRequests();
+            }
         } else {
             doctorContainer.style.display = "none";
             doctorList.style.display = "none";
+            pendingList.style.display = "none";
         }
     }
 
     // Handle Accept and Revoke button actions
-    function handleAction(action) {
-        const doctorId = document.getElementById("doctor-id").textContent;
+    function handleAction(action, doctorId) {
         alert(`Doctor Action: ${action} for ${doctorId}`);
         // Add server-side handling for actions
+        console.log(action);
+        fetch(`/fabric/patient/request/${doctorId}?status=${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            toggleDoctorActions(); // Refresh the doctor actions list
+            return response;
+        })
+        .then(data => {
+            console.log(data);
+            fetchPendingRequests(); // Refresh the pending requests list
+        })
+        .catch(error => {
+            console.error('Error handling doctor action:', error);
+        });
     }
 
-    // Fetch doctor data
+    // Fetch accepted doctor data
     function fetchDoctorData() {
         const loading = document.getElementById('loading');
         loading.style.display = 'block'; // Show loading animation
 
-        console.log(localStorage.getItem('jwt'));
         fetch('/fabric/patient/accepted', {
             method: 'GET',
             headers: {
@@ -297,7 +328,7 @@
                 const revokeButton = document.createElement('button');
                 revokeButton.classList.add('doctor-button', 'revoke-button');
                 revokeButton.textContent = 'Revoke';
-                revokeButton.onclick = () => handleAction('Revoke');
+                revokeButton.onclick = () => handleAction('Revoke', doctorId);
 
                 doctorActionsRow.appendChild(doctorIdDiv);
                 doctorActionsRow.appendChild(viewButton);
@@ -306,10 +337,70 @@
                 doctorDiv.appendChild(doctorActionsRow);
                 doctorListContent.appendChild(doctorDiv);
             });
-            dataFetched = true; // Set the flag to true after data is fetched
+            dataFetched.accepted = true; // Set the flag to true after data is fetched
         })
         .catch(error => {
             console.error('Error fetching doctor data:', error);
+        })
+        .finally(() => {
+            loading.style.display = 'none'; // Hide loading animation
+        });
+    }
+
+    // Fetch pending requests
+    function fetchPendingRequests() {
+        const loading = document.getElementById('loading');
+        loading.style.display = 'block'; // Show loading animation
+
+        fetch('/fabric/patient/request', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            const pendingListContent = document.getElementById('pending-list-content');
+            pendingListContent.innerHTML = ''; // Clear any existing content
+            data.forEach(doctorId => {
+                const doctorDiv = document.createElement('div');
+                doctorDiv.classList.add('container');
+
+                const doctorActionsRow = document.createElement('div');
+                doctorActionsRow.classList.add('doctor-actions-row');
+
+                const doctorIdDiv = document.createElement('div');
+                doctorIdDiv.classList.add('doctor-id-display');
+                doctorIdDiv.textContent = `Doctor ID: ${doctorId}`;
+
+                const acceptButton = document.createElement('button');
+                acceptButton.classList.add('doctor-button', 'accept-button');
+                acceptButton.textContent = 'Accept';
+                acceptButton.onclick = () => handleAction('Accept', doctorId);
+
+                const rejectButton = document.createElement('button');
+                rejectButton.classList.add('doctor-button', 'revoke-button');
+                rejectButton.textContent = 'Reject';
+                rejectButton.onclick = () => handleAction('Reject', doctorId);
+
+                doctorActionsRow.appendChild(doctorIdDiv);
+                doctorActionsRow.appendChild(acceptButton);
+                doctorActionsRow.appendChild(rejectButton);
+
+                doctorDiv.appendChild(doctorActionsRow);
+                pendingListContent.appendChild(doctorDiv);
+            });
+            dataFetched.pending = true; // Set the flag to true after data is fetched
+        })
+        .catch(error => {
+            console.error('Error fetching pending requests:', error);
         })
         .finally(() => {
             loading.style.display = 'none'; // Hide loading animation
@@ -342,13 +433,21 @@
         });
     }
 
-    // Call the function to fetch and display doctor data when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
+    // Refresh data based on the selected status
+    function refreshData() {
         const status = document.getElementById("status").value;
         if (status === "Accepted") {
+            dataFetched.accepted = false;
             fetchDoctorData();
+        } else if (status === "Pending") {
+            dataFetched.pending = false;
+            fetchPendingRequests();
         }
-        toggleDoctorActions(status);
+    }
+
+    // Call the function to fetch and display doctor data when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleDoctorActions();
     });
 
     // Handle logout button click

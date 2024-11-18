@@ -46,7 +46,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         }
 
         const data = await response.text(); // Use response.text() to handle empty responses
-        alert('User registered and PDF uploaded successfully!');
+        alert('User registered and  successfully!');
     } catch (error) {
         console.error('Error during registration and upload:', error);
         alert('An error occurred during registration and upload.\nPlease verify your credentials and try again.');
@@ -70,3 +70,7 @@ function showLoading() {
 function hideLoading() {
     document.getElementById('loading').style.display = 'none';
 }
+document.getElementById('logoutButton').addEventListener('click', function() {
+    localStorage.removeItem('jwt'); // Remove the JWT from local storage
+    window.location.href = '/login.html'; // Redirect to the login page
+});

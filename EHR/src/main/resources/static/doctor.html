@@ -252,6 +252,7 @@
 <script>
     let patients = []; // This will be populated with data from the backend.
     let currentPatientId = null;
+    let isSubmitting = false; // Flag to prevent multiple submissions
 
     // Show loading animation
     function showLoading() {
@@ -298,7 +299,7 @@
                 <h4>Patient ID: ${patient.pid}</h4>
                 <div style="display: flex; gap: 1cm;">
                     <button class="view-button" onclick="viewPDF('${patient.pid}')">View PDF</button>
-                    <button class="update-button" onclick="showEditModal('${patient.id}')">Update</button>
+                    <button class="update-button" onclick="showEditModal('${patient.pid}')">Update</button>
                 </div>
             `;
             patientList.appendChild(patientItem);
@@ -360,9 +361,13 @@
 
     // Add request to a patient
     function addRequest() {
+        if (isSubmitting) return; // Prevent multiple submissions
+        isSubmitting = true;
+
         const patientId = document.getElementById('patient-id').value;
         if (patientId.trim() === "") {
             alert("Please enter a patient ID.");
+            isSubmitting = false;
             return;
         }
 
@@ -375,7 +380,12 @@
                 'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             alert("Request added successfully!");
             // Optionally, refresh the patient list
@@ -386,6 +396,7 @@
         })
         .finally(() => {
             hideLoading();
+            isSubmitting = false; // Reset the flag after the request is complete
         });
     }
 
@@ -394,6 +405,34 @@
         localStorage.removeItem('jwt'); // Remove the JWT from local storage
         window.location.href = '/login.html'; // Redirect to the login page
     });
+
+    // Handle accept/reject actions
+    function handleAction(action, doctorId) {
+        if (isSubmitting) return; // Prevent multiple submissions
+        isSubmitting = true;
+
+        showLoading();
+        fetch(`/fabric/doctor/request/${doctorId}?status=${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Request ${action.toLowerCase()}ed successfully!`);
+            // Optionally, refresh the patient list
+            window.location.reload();
+        })
+        .catch(error => {
+            alert(`Error ${action.toLowerCase()}ing request: ` + error.message);
+        })
+        .finally(() => {
+            hideLoading();
+            isSubmitting = false; // Reset the flag after the request is complete
+        });
+    }
 </script>
 
 </body>

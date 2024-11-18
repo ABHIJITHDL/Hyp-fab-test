@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View PDF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
         /* General Page Styling */
         body {
@@ -76,7 +77,7 @@
         /* Content Container Styling */
         .container {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 10px;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             text-align: center;
@@ -84,11 +85,11 @@
 
         /* PDF Viewer Styling */
         .pdf-viewer {
-            width: 100%;
-            height: 600px;
+            width: auto;
+            height: 80vh;
             border: 1px solid #ddd;
             border-radius: 4px;
-            overflow-y: scroll; /* Allow vertical scrolling */
+            overflow-y: hidden; /* Prevent vertical scrolling */
         }
 
         /* Loading Animation */
@@ -107,6 +108,77 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background-color: #005bb5;
+        }
+
+        /* Update PDF Form */
+        .update-form {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .update-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .update-form button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .update-form button:hover {
+            background-color: #005bb5;
+        }
+
+        .editor-container {
+            display: none;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        #editor {
+            width: 100%;
+            min-height: 800px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            resize: vertical;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +189,8 @@
     <div class="button-container">
         <button class="button logout-button" id="logoutButton">Logout</button>
         <button class="button back-button" id="backButton">Go Back</button>
+        <button class="button update-button" id="updateButton">Update</button>
+        <button class="button submit-update-button" id="submitUpdateButton" style="display: none;">Submit Update</button>
     </div>
 </div>
 
@@ -125,7 +199,18 @@
     <div class="container">
         <h2 id="patient-id-title"></h2>
         <div class="loading" id="loading"></div>
-        <iframe class="pdf-viewer" id="pdfViewer" src=""></iframe>
+        <div id="pdfContainer" class="pdf-container">
+            <canvas id="pdfCanvas" class="pdf-viewer"></canvas>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-button" id="prevPage">Previous</button>
+            <button class="nav-button" id="nextPage">Next</button>
+        </div>
+        <p>Page <span id="pageNum"></span> of <span id="pageCount"></span></p>
+        <div class="editor-container" id="editorContainer">
+            <textarea id="editor"></textarea>
+            <button class="button" id="submitChange">Submit Change</button>
+        </div>
     </div>
 </div>
 
@@ -139,6 +224,69 @@
     function hideLoading() {
         document.getElementById('loading').style.display = 'none';
     }
+
+    let pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 1.0,
+        isEditing = false,
+        canvas = document.getElementById('pdfCanvas'),
+        ctx = canvas.getContext('2d');
+
+    function renderPage(num) {
+        pageRendering = true;
+        showLoading();
+        pdfDoc.getPage(num).then(function(page) {
+            const viewport = page.getViewport({ scale: scale });
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            const renderTask = page.render(renderContext);
+
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                hideLoading();
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+        document.getElementById('pageNum').textContent = num;
+    }
+
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    function onPrevPage() {
+        if (pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+
+    function onNextPage() {
+        if (pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+
+    document.getElementById('prevPage').addEventListener('click', onPrevPage);
+    document.getElementById('nextPage').addEventListener('click', onNextPage);
 
     document.addEventListener('DOMContentLoaded', () => {
         const patientId = localStorage.getItem('patientId');
@@ -162,8 +310,11 @@
         })
         .then(blob => {
             const url = URL.createObjectURL(blob);
-            const pdfViewer = document.getElementById('pdfViewer');
-            pdfViewer.src = url;
+            pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+                pdfDoc = pdfDoc_;
+                document.getElementById('pageCount').textContent = pdfDoc.numPages;
+                renderPage(pageNum);
+            });
         })
         .catch(error => {
             console.error('Error fetching PDF URL:', error);
@@ -171,6 +322,115 @@
         .finally(() => {
             hideLoading();
         });
+    });
+
+    document.getElementById('updateButton').addEventListener('click', async function() {
+        isEditing = !isEditing;
+        const pdfContainer = document.getElementById('pdfContainer');
+        const editorContainer = document.getElementById('editorContainer');
+        const updateBtn = document.getElementById('updateButton');
+        const submitUpdateBtn = document.getElementById('submitUpdateButton');
+
+        if (isEditing) {
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const text = textContent.items.map(item => item.str).join(' ');
+
+                document.getElementById('editor').value = text;
+                pdfContainer.style.display = 'none';
+                editorContainer.style.display = 'block';
+                updateBtn.textContent = 'Cancel';
+                submitUpdateBtn.style.display = 'none';
+            } catch (error) {
+                console.error('Error extracting text:', error);
+                alert('Failed to convert PDF to editable text. Please try again.');
+            }
+        } else {
+            pdfContainer.style.display = 'flex';
+            editorContainer.style.display = 'none';
+            updateBtn.textContent = 'Update';
+            submitUpdateBtn.style.display = 'none';
+        }
+    });
+
+    document.getElementById('submitChange').addEventListener('click', async function() {
+        const updatedContent = document.getElementById('editor').value;
+
+        try {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: scale });
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.height = viewport.height;
+            tempCanvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: tempCtx,
+                viewport: viewport
+            };
+
+            await page.render(renderContext).promise;
+
+            // Draw the new text on the canvas
+            tempCtx.font = "16px Arial";
+            tempCtx.fillStyle = "black";
+            tempCtx.fillText(updatedContent, 10, tempCanvas.height - 20);
+
+            // Convert the canvas to an image and render it on the main canvas
+            const img = new Image();
+            img.src = tempCanvas.toDataURL();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+            };
+
+            // Switch back to view mode
+            isEditing = false;
+            document.getElementById('pdfContainer').style.display = 'flex';
+            document.getElementById('editorContainer').style.display = 'none';
+            document.getElementById('updateButton').textContent = 'Update';
+            document.getElementById('submitUpdateButton').style.display = 'block';
+
+        } catch (error) {
+            console.error('Error updating PDF:', error);
+            alert(`Error updating PDF: ${error.message}`);
+        }
+    });
+
+    document.getElementById('submitUpdateButton').addEventListener('click', async function() {
+        try {
+            const formData = new FormData();
+            formData.append('patientId', localStorage.getItem('patientId'));
+
+            canvas.toBlob(async function(blob) {
+                formData.append('file', blob, 'updated.pdf');
+
+                const response = await fetch('/fabric/doctor/update', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to update PDF: ${errorText}`);
+                }
+
+                // Get the updated PDF URL from response
+                const result = await response.json();
+
+                // Reload the PDF with updates
+                await loadPDF(result.pdfUrl);
+
+                alert('PDF updated successfully!');
+            }, 'application/pdf');
+
+        } catch (error) {
+            console.error('Error updating PDF:', error);
+            alert(`Error updating PDF: ${error.message}`);
+        }
     });
 
     document.getElementById('logoutButton').addEventListener('click', function() {
@@ -181,6 +441,30 @@
     document.getElementById('backButton').addEventListener('click', function() {
         window.location.href = '/doctor.html'; // Redirect to the doctor page
     });
+
+    // Initialize with your PDF URL
+    async function loadPDF(url) {
+        try {
+            const loadingTask = pdfjsLib.getDocument(url);
+            document.getElementById('loading').style.display = 'block';
+
+            pdfDoc = await loadingTask.promise;
+            document.getElementById('pageCount').textContent = pdfDoc.numPages;
+            document.getElementById('loading').style.display = 'none';
+
+            // Initial page render
+            renderPage(pageNum);
+        } catch (error) {
+            console.error('Error loading PDF:', error);
+        }
+    }
+
+    // Initialize with your PDF URL
+    window.onload = function() {
+        const patientId = localStorage.getItem('patientId');
+        const pdfUrl = `/fabric/doctor/view-pdf?patientId=${patientId}`;
+        loadPDF(pdfUrl);
+    };
 </script>
 
 </body>

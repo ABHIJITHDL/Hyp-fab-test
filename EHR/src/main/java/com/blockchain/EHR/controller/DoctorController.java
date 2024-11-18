@@ -27,6 +27,8 @@ import com.itextpdf.layout.element.Paragraph;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,25 +50,30 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadPdf(@RequestParam("pid")String pid,
-                                       @RequestParam("file")MultipartFile pdf){
-        System.out.println("Received upload request for PID: " + pid);
-        try {
-            Patient patient = pdfService.upload(pid, pdf);
-            System.out.println("PDF uploaded successfully: " + patient.getPatientId());
-            return new ResponseEntity<>(patient, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error during PDF upload: " + e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @GetMapping("/pdf")
+    public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
+        Optional<Patient> patientOptional = patientRepository.findById(pid);
+
+        if (patientOptional.isPresent()) {
+            byte[] pdfFile = patientOptional.get().getPdfData();
+
+            // Set the appropriate content type for PDF
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=patient_" + pid + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfFile);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
     @PostMapping("add-request")
     public ResponseEntity<?> addRequest(HttpServletRequest request,@RequestParam("pid")String pid){
+        System.out.println("Add request");
         String jwt = jwtUtils.getJwtFromHeader(request);
         String did = jwtUtils.getUserNameFromJwtToken(jwt);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+        doctorService.addRequest(did,pid);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -86,12 +93,26 @@ public class DoctorController {
     }
 
     @GetMapping("/view-pdf")
-    public ResponseEntity<byte[]> viewPdf(@RequestParam String patientId) {
+    public ResponseEntity<byte[]> viewPdf(HttpServletRequest request,@RequestParam String patientId) {
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String did = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         Optional<Patient> patientOptional = patientRepository.findById(patientId);
-
         if (patientOptional.isPresent()) {
             byte[] pdfFile = patientOptional.get().getPdfData();
-
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(pdfFile);
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    hexString.append(String.format("%02x", b));
+                }
+                if (!doctorService.addAccess(did,patientId,hexString.toString(),mspId)){
+                    return ResponseEntity.notFound().build();
+                }
+            } catch (NoSuchAlgorithmException e) {
+                return ResponseEntity.internalServerError().build();
+            }
             // Set the appropriate content type for PDF
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=patient_" + patientId + ".pdf")

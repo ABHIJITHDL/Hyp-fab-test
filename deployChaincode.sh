@@ -168,14 +168,27 @@ chaincodeInvokeInit(){
 # chaincodeInvokeInit
 
 chaincodeInvoke(){
-     setGlobalsForPeer0Org1
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
-    --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
-    --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
-    --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-    -c '{"function": "recordAccess","Args": ["D02", "P01", "hash22","2024-11-21"]}'
+#     setGlobalsForPeer0Org1
+#    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
+#    --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
+#    --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
+#    --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
+#     -c '{"function": "createEHRRecord","Args": ["D02", "P01", "hash111","2024-09-09"]}'
+#
+#    setGlobalsForPeer0Org1
+#    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
+#        --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
+#        --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
+#        --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
+#    -c '{"function": "createEHRRecord","Args": ["D01", "P01", "hash23","2024-10-03"]}'
+
     setGlobalsForPeer0Org1
-#    -c '{"function": "createEHRRecord","Args": ["D02", "P01", "hash111","2024-09-09"]}'\
+        peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
+            --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
+            --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
+            --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
+        -c '{"function": "createEHRRecord","Args": ["D01","P01", "hash23","2024-10-03"]}'
+#
 
     ## Create Car
     # peer chaincode invoke -o localhost:7050 \

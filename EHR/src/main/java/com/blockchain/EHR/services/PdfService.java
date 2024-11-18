@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 
 @Service
 public class PdfService {
@@ -36,7 +39,25 @@ public class PdfService {
         return patient.getPdfData();
     }
 
-    // Add a new page with paragraphs and return the updated PDF as a byte array
+    public String getHash(byte[] pdf){
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(pdf);
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+
+        }
+        return " ";
+    }
+
+   ; // Add a new page with paragraphs and return the updated PDF as a byte array
 //    public byte[] addPagesToPdf(byte[] existingPdfData, String newText) throws IOException {
 //        PDDocument document = PDDocument.load(existingPdfData);
 //

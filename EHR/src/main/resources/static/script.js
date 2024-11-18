@@ -62,6 +62,7 @@ function fetchWithAuth(url, options = {}) {
     return fetch(url, options);
 }
 
+
 // Example usage of fetchWithAuth
 document.getElementById('fetchProtectedData').addEventListener('click', function() {
     fetchWithAuth('/api/protected')

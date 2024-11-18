@@ -48,7 +48,19 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
 
-
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadPdf(@RequestParam("pid")String pid,
+                                       @RequestParam("file")MultipartFile pdf){
+        System.out.println("Received upload request for PID: " + pid);
+        try {
+            Patient patient = pdfService.upload(pid, pdf);
+            System.out.println("PDF uploaded successfully: " + patient.getPatientId());
+            return new ResponseEntity<>(patient, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("Error during PDF upload: " + e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @GetMapping("/pdf")
     public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
         Optional<Patient> patientOptional = patientRepository.findById(pid);
@@ -81,9 +93,26 @@ public class PatientController {
         }
     }
 
+    @GetMapping("/request")
+    public List<String> getPendingRequests(HttpServletRequest request){
+        System.out.println("pending request");
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String pid = jwtUtils.getUserNameFromJwtToken(jwt);
+        return patientService.getPendingRequest(pid);
+    }
+
+    @PostMapping("/request/{did}")
+    public void updatePendingRequest(HttpServletRequest request,
+                                     @PathVariable String did,
+                                     @RequestParam String status){
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String pid = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+        patientService.updateStatus(pid,did,status,mspId);
+}
+
     @GetMapping("/history/{did}")
     public ResponseEntity<List<Transaction>> getDoctorHistory(HttpServletRequest request, @PathVariable String did) {
-        System.out.println("Controller called");
         String jwt = jwtUtils.getJwtFromHeader(request);
         String pid = jwtUtils.getUserNameFromJwtToken(jwt);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
