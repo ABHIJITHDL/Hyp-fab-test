@@ -159,7 +159,7 @@ queryCommitted(){
 
 chaincodeInvokeInit(){
     setGlobalsForPeer0Org1
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["createEHRRecord", "D01", "P01", "hash111","2024-09-09"]}'
+    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["initLedger"]}'
 
 #    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA --isInit -c '{"Args":["createEHRRecord", "D01", "P01", "hash111","2024-09-09"]}'
 
@@ -187,8 +187,8 @@ chaincodeInvoke(){
             --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
             --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
             --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-        -c '{"function": "createEHRRecord","Args": ["D01","P01", "hash23","2024-10-03"]}'
-#
+        -c '{"function": "getEHRRecord","Args": ["D01","P01"]}'
+
 
     ## Create Car
     # peer chaincode invoke -o localhost:7050 \
@@ -225,7 +225,7 @@ chaincodeQuery(){
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createMyAsset","Args":["ID2","TEST2"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "readMyAsset","Args":["ID"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createEHRRecord","Args":["ehr02", "D01", "P02", "hash222"]}'
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "getAllEHRRecordByDoctor","Args": ["D01"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "getAllEHRRecordByPatient","Args": ["D01"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["createMyAsset","ID","Test"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["readMyAsset","ID"]}'
     #'{"Args":["GetSampleData","Key1"]}'
@@ -234,17 +234,17 @@ chaincodeQuery(){
 
 #presetup
 # packageChaincode
-# installChaincode
-# queryInstalled
-# approveForMyOrg1
-# checkCommitReadyness
-# approveForMyOrg2
-# checkCommitReadyness
-# commitChaincodeDefination
-# queryCommitted
-# sleep 3
-# chaincodeInvokeInit
+ installChaincode
+ queryInstalled
+ approveForMyOrg1
+ checkCommitReadyness
+ approveForMyOrg2
+ checkCommitReadyness
+ commitChaincodeDefination
+ queryCommitted
+ sleep 3
+ chaincodeInvokeInit
 # sleep 5
- chaincodeInvoke
+# chaincodeInvoke
 # sleep 3
 # chaincodeQuery

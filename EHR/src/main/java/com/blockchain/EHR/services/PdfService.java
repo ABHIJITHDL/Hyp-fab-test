@@ -23,7 +23,7 @@ public class PdfService {
     @Autowired
     private PatientRepository patientRepository;
 
-    // Upload PDF (store patient and file)
+    // To-Do: Change EHR Format from pdf to Json
     public Patient upload(String pid, MultipartFile pdf) throws IOException {
         Patient patient = new Patient();
         patient.setPatientId(pid);
@@ -32,7 +32,7 @@ public class PdfService {
         return patientRepository.save(patient);
     }
 
-    // Fetch existing PDF by Patient ID
+
     public byte[] fetchPdf(String pid) {
         Patient patient = patientRepository.findById(pid)
                 .orElseThrow(() -> new EntityNotFoundException("Patient not found with ID: " + pid));
