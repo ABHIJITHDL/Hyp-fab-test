@@ -17,6 +17,5 @@ public class Patient {
     @Id
     private String patientId;
     private String ehrId;
-    @Lob
-    private byte[] pdfData;
+    private EhrDocument ehrDocument;
 }

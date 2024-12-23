@@ -106,7 +106,7 @@ public class FabricUserRegistration {
         try {
             // Load the JSON configuration file
             ObjectMapper mapper = new ObjectMapper();
-            String connectionProfilePath = String.format("EHR/src/main/resources/static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase());
+            String connectionProfilePath = String.format("src/main/resources/static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase());
             File connectionProfileFile = new File(connectionProfilePath);
             JsonNode connectionProfile = mapper.readTree(connectionProfileFile);
 

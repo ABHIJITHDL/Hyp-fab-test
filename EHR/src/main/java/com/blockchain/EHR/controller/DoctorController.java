@@ -2,8 +2,10 @@ package com.blockchain.EHR.controller;
 
 
 import com.blockchain.EHR.jwt.JwtUtils;
+import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.PatientStatus;
+import com.blockchain.EHR.model.Pending;
 import com.blockchain.EHR.repository.PatientRepository;
 import com.blockchain.EHR.services.DoctorService;
 import com.blockchain.EHR.services.PdfService;
@@ -49,23 +51,25 @@ public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
+    @Autowired
+    private com.blockchain.EHR.repository.PendingRepository pendingRepository;
 
-    @GetMapping("/pdf")
-    public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
-        Optional<Patient> patientOptional = patientRepository.findById(pid);
-
-        if (patientOptional.isPresent()) {
-            byte[] pdfFile = patientOptional.get().getPdfData();
-
-            // Set the appropriate content type for PDF
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=patient_" + pid + ".pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(pdfFile);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @GetMapping("/pdf")
+//    public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
+//        Optional<Patient> patientOptional = patientRepository.findById(pid);
+//
+//        if (patientOptional.isPresent()) {
+//            byte[] pdfFile = patientOptional.get().getPdfData();
+//
+//            // Set the appropriate content type for PDF
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=patient_" + pid + ".pdf")
+//                    .contentType(MediaType.APPLICATION_PDF)
+//                    .body(pdfFile);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
     @PostMapping("add-request")
     public ResponseEntity<?> addRequest(HttpServletRequest request,@RequestParam("pid")String pid){
@@ -92,44 +96,51 @@ public class DoctorController {
 
     }
 
-    @GetMapping("/view-pdf")
-    public ResponseEntity<byte[]> viewPdf(HttpServletRequest request,@RequestParam String patientId) {
+    // View EHR document (only if pending request status is 'Accepted')
+    @GetMapping("/view-ehr")
+    public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {
         String jwt = jwtUtils.getJwtFromHeader(request);
-        String did = jwtUtils.getUserNameFromJwtToken(jwt);
-        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
+
+        // Check if the request status is 'Accepted'
+        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
+        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Access denied
+        }
+
+        // Fetch the patient's EHR document
         Optional<Patient> patientOptional = patientRepository.findById(patientId);
         if (patientOptional.isPresent()) {
-            byte[] pdfFile = patientOptional.get().getPdfData();
-            try {
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] hash = digest.digest(pdfFile);
-                StringBuilder hexString = new StringBuilder();
-                for (byte b : hash) {
-                    hexString.append(String.format("%02x", b));
-                }
-                if (!doctorService.addAccess(did,patientId,hexString.toString(),mspId)){
-                    return ResponseEntity.notFound().build();
-                }
-            } catch (NoSuchAlgorithmException e) {
-                return ResponseEntity.internalServerError().build();
-            }
-            // Set the appropriate content type for PDF
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=patient_" + patientId + ".pdf")
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(pdfFile);
+            EhrDocument ehrDocument = patientOptional.get().getEhrDocument();
+            return ResponseEntity.ok(ehrDocument);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // Patient not found
         }
     }
 
-    @PostMapping("/update-pdf")
-    public ResponseEntity<String> updatePdf(@RequestParam String pid, @RequestParam String newText) {
-        try {
-            pdfService.updatePdf(pid, newText);
-            return ResponseEntity.ok("PDF updated successfully!");
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error updating PDF: " + e.getMessage());
+
+    // Update EHR document (only by approved doctors)
+    @PostMapping("/update-ehr")
+    public ResponseEntity<String> updateEhr(HttpServletRequest request, @RequestParam String patientId,
+                                            @RequestBody EhrDocument updatedEhrDocument) {
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
+
+        // Check if the request status is 'Accepted'
+        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
+        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
+        }
+
+        // Fetch the patient's record and update the EHR document
+        Optional<Patient> patientOptional = patientRepository.findById(patientId);
+        if (patientOptional.isPresent()) {
+            Patient patient = patientOptional.get();
+            patient.setEhrDocument(updatedEhrDocument); // Update the EHR document
+            patientRepository.save(patient); // Save the updated patient record
+            return ResponseEntity.ok("EHR document updated successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
         }
     }
 }
