@@ -8,6 +8,7 @@ import com.blockchain.EHR.model.PatientStatus;
 import com.blockchain.EHR.model.Pending;
 import com.blockchain.EHR.repository.PatientRepository;
 import com.blockchain.EHR.services.DoctorService;
+import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.PdfService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,23 +54,9 @@ public class DoctorController {
     private DoctorService doctorService;
     @Autowired
     private com.blockchain.EHR.repository.PendingRepository pendingRepository;
+    @Autowired
+    private EhrService ehrService;
 
-//    @GetMapping("/pdf")
-//    public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
-//        Optional<Patient> patientOptional = patientRepository.findById(pid);
-//
-//        if (patientOptional.isPresent()) {
-//            byte[] pdfFile = patientOptional.get().getPdfData();
-//
-//            // Set the appropriate content type for PDF
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=patient_" + pid + ".pdf")
-//                    .contentType(MediaType.APPLICATION_PDF)
-//                    .body(pdfFile);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 
     @PostMapping("add-request")
     public ResponseEntity<?> addRequest(HttpServletRequest request,@RequestParam("pid")String pid){
@@ -96,28 +83,69 @@ public class DoctorController {
 
     }
 
+//    // View EHR document (only if pending request status is 'Accepted')
+//    @GetMapping("/view-ehr")
+//    public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {
+//        String jwt = jwtUtils.getJwtFromHeader(request);
+//        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
+//
+//        // Check if the request status is 'Accepted'
+//        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
+//        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Access denied
+//        }
+//
+//        // Fetch the patient's EHR document
+//        Optional<Patient> patientOptional = patientRepository.findById(patientId);
+//        if (patientOptional.isPresent()) {
+//            EhrDocument ehrDocument = patientOptional.get().getEhrDocument();
+//            return ResponseEntity.ok(ehrDocument);
+//        } else {
+//            return ResponseEntity.notFound().build(); // Patient not found
+//        }
+//    }
+//
+//
+//    // Update EHR document (only by approved doctors)
+//    @PostMapping("/update-ehr")
+//    public ResponseEntity<String> updateEhr(HttpServletRequest request, @RequestParam String patientId,
+//                                            @RequestBody EhrDocument updatedEhrDocument) {
+//        String jwt = jwtUtils.getJwtFromHeader(request);
+//        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
+//x
+//        // Check if the request status is 'Accepted'
+//        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
+//        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
+//        }
+//
+//        // Fetch the patient's record and update the EHR document
+//        Optional<Patient> patientOptional = patientRepository.findById(patientId);
+//        if (patientOptional.isPresent()) {
+//            Patient patient = patientOptional.get();
+//            patient.setEhrDocument(updatedEhrDocument); // Update the EHR document
+//            patientRepository.save(patient); // Save the updated patient record
+//            return ResponseEntity.ok("EHR document updated successfully!");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
+//        }
+//    }
     // View EHR document (only if pending request status is 'Accepted')
     @GetMapping("/view-ehr")
     public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {
         String jwt = jwtUtils.getJwtFromHeader(request);
         String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
 
-        // Check if the request status is 'Accepted'
-        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
-        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+        // Check access approval
+        if (!ehrService.isAccessApproved(patientId, did)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Access denied
         }
 
-        // Fetch the patient's EHR document
-        Optional<Patient> patientOptional = patientRepository.findById(patientId);
-        if (patientOptional.isPresent()) {
-            EhrDocument ehrDocument = patientOptional.get().getEhrDocument();
-            return ResponseEntity.ok(ehrDocument);
-        } else {
-            return ResponseEntity.notFound().build(); // Patient not found
-        }
+        // Fetch the EHR document
+        return ehrService.getEhrDocument(patientId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
 
     // Update EHR document (only by approved doctors)
     @PostMapping("/update-ehr")
@@ -126,22 +154,19 @@ public class DoctorController {
         String jwt = jwtUtils.getJwtFromHeader(request);
         String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
 
-        // Check if the request status is 'Accepted'
-        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
-        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
+        // Check access approval
+        if (!ehrService.isAccessApproved(patientId, did)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
         }
 
-        // Fetch the patient's record and update the EHR document
-        Optional<Patient> patientOptional = patientRepository.findById(patientId);
-        if (patientOptional.isPresent()) {
-            Patient patient = patientOptional.get();
-            patient.setEhrDocument(updatedEhrDocument); // Update the EHR document
-            patientRepository.save(patient); // Save the updated patient record
+        // Update the EHR document
+        boolean isUpdated = ehrService.updateEhrDocument(patientId, updatedEhrDocument);
+        if (isUpdated) {
             return ResponseEntity.ok("EHR document updated successfully!");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
         }
     }
+
 }
 
