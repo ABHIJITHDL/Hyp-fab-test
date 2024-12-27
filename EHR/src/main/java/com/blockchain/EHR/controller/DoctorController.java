@@ -134,17 +134,14 @@ public class DoctorController {
     @GetMapping("/view-ehr")
     public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {
         String jwt = jwtUtils.getJwtFromHeader(request);
-        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
-
-        // Check access approval
-        if (!ehrService.isAccessApproved(patientId, did)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Access denied
-        }
-
+        String did = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         // Fetch the EHR document
-        return ehrService.getEhrDocument(patientId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        EhrDocument ehrDocument= ehrService.getEhrDocument(patientId,did,mspId);
+        if(ehrDocument!=null){
+            return new ResponseEntity<>(ehrDocument,HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // Update EHR document (only by approved doctors)

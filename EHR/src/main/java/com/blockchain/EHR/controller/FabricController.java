@@ -2,7 +2,9 @@ package com.blockchain.EHR.controller;
 
 import com.blockchain.EHR.jwt.CustomUserDetails;
 import com.blockchain.EHR.jwt.JwtUtils;
+import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Patient;
+import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.FabricService;
 import com.blockchain.EHR.services.FabricUserRegistration;
 import com.blockchain.EHR.services.PdfService;
@@ -28,13 +30,13 @@ import java.util.Date;
 @RestController
 @RequestMapping("/fabric")
 public class FabricController {
-    private final PdfService pdfService;
+    private final EhrService ehrService;
     private final FabricService fabricService;
     private final FabricUserRegistration fabricUserRegistration;
     private final JwtUtils jwtUtils;
 
-    public FabricController(PdfService pdfService, FabricService fabricService, FabricUserRegistration fabricUserRegistration, JwtUtils jwtUtils) {
-        this.pdfService = pdfService;
+    public FabricController(EhrService ehrService, FabricService fabricService, FabricUserRegistration fabricUserRegistration, JwtUtils jwtUtils) {
+        this.ehrService = ehrService;
         this.fabricService = fabricService;
         this.fabricUserRegistration = fabricUserRegistration;
         this.jwtUtils = jwtUtils;
@@ -94,17 +96,17 @@ public class FabricController {
     public String enrollUser(HttpServletRequest request,
                              @RequestParam String username,
                              @RequestParam String password,
-                             @RequestParam(value = "file",required = false ) MultipartFile pdf) {
+                             @RequestParam(value = "file",required = false ) EhrDocument ehrDocument) {
 
         String jwt = jwtUtils.getJwtFromHeader(request);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         String id = jwtUtils.getUserNameFromJwtToken(jwt);
         System.out.println("Register controller");
-        if(pdf!=null){
+        if(ehrDocument!=null){
             if(!"Org2MSP".equals(mspId) )
                 return "Only Patient Admin can Upload pdf";
             try {
-                Patient patient = pdfService.upload(username, pdf);
+                ehrService.updateEhrDocument(username, ehrDocument);
             } catch (Exception e) {
                 System.err.println("Error during PDF upload: " + e.getMessage());
                 return "Error During uploading pdf";

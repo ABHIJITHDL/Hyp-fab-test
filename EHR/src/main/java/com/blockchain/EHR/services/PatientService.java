@@ -1,5 +1,6 @@
 package com.blockchain.EHR.services;
 
+import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Pending;
 import com.blockchain.EHR.model.Transaction;
 import com.blockchain.EHR.repository.PendingRepository;
@@ -21,7 +22,7 @@ public class PatientService {
     private PendingRepository pendingRepository;
 
     @Autowired
-    private PdfService pdfService;
+    private EhrService ehrService;
 
     public List<String> getDoctors(String pid,String mspId) throws JsonProcessingException {
         String[] args = {pid};
@@ -71,8 +72,8 @@ public class PatientService {
             pendingRepository.delete(pending);
             String[] args = {pid,did};
             String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,pid,mspId);
-            byte[] pdf = pdfService.fetchPdf(pid);
-            String hash = pdfService.getHash(pdf);
+            EhrDocument ehrDocument = ehrService.fetchPdf(pid);
+            String hash = ehrService.getHash(ehrDocument);
             if(response.equals("Transaction failed")){
                     String[] create = {did,pid,hash, LocalDate.now().toString()};
                     fabricService.submitTransaction("mychannel","ehr","createEHRRecord",create,pid,mspId);
