@@ -8,6 +8,7 @@ import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.FabricService;
 import com.blockchain.EHR.services.FabricUserRegistration;
 import com.blockchain.EHR.services.PdfService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.kernel.pdf.annot.Pdf3DAnnotation;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
@@ -96,16 +97,18 @@ public class FabricController {
     public String enrollUser(HttpServletRequest request,
                              @RequestParam String username,
                              @RequestParam String password,
-                             @RequestParam(value = "file",required = false ) EhrDocument ehrDocument) {
+                             @RequestParam(value = "file",required = false ) MultipartFile file) {
 
         String jwt = jwtUtils.getJwtFromHeader(request);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
         String id = jwtUtils.getUserNameFromJwtToken(jwt);
         System.out.println("Register controller");
-        if(ehrDocument!=null){
+        if(file!=null){
             if(!"Org2MSP".equals(mspId) )
                 return "Only Patient Admin can Upload pdf";
             try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                EhrDocument ehrDocument = objectMapper.readValue(file.getInputStream(),EhrDocument.class);
                 ehrService.updateEhrDocument(username, ehrDocument);
             } catch (Exception e) {
                 System.err.println("Error during PDF upload: " + e.getMessage());

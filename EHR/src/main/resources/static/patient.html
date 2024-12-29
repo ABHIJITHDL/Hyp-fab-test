@@ -291,7 +291,6 @@
     function fetchDoctorData() {
         const loading = document.getElementById('loading');
         loading.style.display = 'block'; // Show loading animation
-
         fetch('/fabric/patient/accepted', {
             method: 'GET',
             headers: {
@@ -383,12 +382,12 @@
                 const acceptButton = document.createElement('button');
                 acceptButton.classList.add('doctor-button', 'accept-button');
                 acceptButton.textContent = 'Accept';
-                acceptButton.onclick = () => handleAction('Accept', doctorId);
+                acceptButton.onclick = () => handleAction('Accepted', doctorId);
 
                 const rejectButton = document.createElement('button');
                 rejectButton.classList.add('doctor-button', 'revoke-button');
                 rejectButton.textContent = 'Reject';
-                rejectButton.onclick = () => handleAction('Reject', doctorId);
+                rejectButton.onclick = () => handleAction('Rejected', doctorId);
 
                 doctorActionsRow.appendChild(doctorIdDiv);
                 doctorActionsRow.appendChild(acceptButton);

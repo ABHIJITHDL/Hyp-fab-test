@@ -1,0 +1,17 @@
+{
+    "ehrId": "P02",
+    "diagnosis": "Chronic Obstructive Pulmonary Disease (COPD)",
+    "treatment": "Bronchodilator therapy, oxygen support",
+    "medications": "Albuterol, Tiotropium",
+    "doctorNotes": "Exacerbation noted. Prescribed additional bronchodilator.",
+    "patientHistory": "Smoker for 20 years, diagnosed with COPD 5 years ago.",
+    "allergies": "None",
+    "labResults": "Pulmonary function test: FEV1/FVC ratio: 60%",
+    "imagingReports": "Chest X-ray shows hyperinflated lungs, no signs of infection.",
+    "vitalSigns": "BP: 140/90, Heart Rate: 88 bpm, SpO2: 92%",
+    "familyHistory": "No known family history of respiratory diseases.",
+    "lifestyleFactors": "Smoker, no alcohol consumption.",
+    "immunizations": "Pneumococcal vaccine (2023), Influenza vaccine (2024)",
+    "carePlan": "Encourage smoking cessation, continue bronchodilator therapy.",
+    "followUpInstructions": "Schedule a follow-up in 1 month to reassess lung function."
+}

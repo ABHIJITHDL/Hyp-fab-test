@@ -69,7 +69,6 @@ public class PatientService {
         System.out.println(status);
         if(status.equals("Accept")){
             System.out.println("Accepted");
-            pendingRepository.delete(pending);
             String[] args = {pid,did};
             String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,pid,mspId);
             EhrDocument ehrDocument = ehrService.fetchPdf(pid);

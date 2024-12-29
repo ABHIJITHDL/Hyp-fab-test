@@ -1,0 +1,17 @@
+{
+    "ehrId": "P03",
+    "diagnosis": "Asthma",
+    "treatment": "Inhaled corticosteroids",
+    "medications": "Budesonide inhaler",
+    "doctorNotes": "Patient experiencing mild asthma symptoms during seasonal changes.",
+    "patientHistory": "Diagnosed with asthma at age 5, history of seasonal allergies.",
+    "allergies": "Peanuts",
+    "labResults": "Peak flow test: 85% of predicted value.",
+    "imagingReports": "Normal findings on chest X-ray.",
+    "vitalSigns": "BP: 110/70, Heart Rate: 80 bpm",
+    "familyHistory": "Mother has seasonal allergies, father has mild asthma.",
+    "lifestyleFactors": "Active, participates in sports.",
+    "immunizations": "MMR (2019), Polio booster (2020)",
+    "carePlan": "Use inhaler as needed, avoid allergens.",
+    "followUpInstructions": "Visit in 6 months or earlier if symptoms worsen."
+}

@@ -153,14 +153,17 @@ public class DoctorController {
 
         // Check access approval
         if (!ehrService.isAccessApproved(patientId, did)) {
+            System.out.println("Access denied. Doctor not approved to update.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
         }
 
         // Update the EHR document
         boolean isUpdated = ehrService.updateEhrDocument(patientId, updatedEhrDocument);
         if (isUpdated) {
+            System.out.println("EHR document updated successfully!");
             return ResponseEntity.ok("EHR document updated successfully!");
         } else {
+            System.out.println("Patient not found.");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
         }
     }

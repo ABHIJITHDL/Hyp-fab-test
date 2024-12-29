@@ -1,0 +1,17 @@
+{
+    "ehrId": "P01",
+    "diagnosis": "Type 2 Diabetes",
+    "treatment": "Insulin therapy",
+    "medications": "Metformin, Insulin",
+    "doctorNotes": "Patient is responding well to insulin therapy. Monitor blood glucose levels weekly.",
+    "patientHistory": "History of high blood pressure, diagnosed with Type 2 Diabetes 3 years ago.",
+    "allergies": "Penicillin",
+    "labResults": "HbA1c: 7.2%, Fasting glucose: 120 mg/dL",
+    "imagingReports": "No significant findings from abdominal ultrasound.",
+    "vitalSigns": "BP: 130/80, Heart Rate: 72 bpm",
+    "familyHistory": "Father diagnosed with Type 2 Diabetes at age 50.",
+    "lifestyleFactors": "Non-smoker, occasional alcohol consumption.",
+    "immunizations": "Influenza vaccine (2024), Tetanus booster (2022)",
+    "carePlan": "Continue insulin therapy, maintain healthy diet and exercise.",
+    "followUpInstructions": "Follow up in 3 months for a review."
+}

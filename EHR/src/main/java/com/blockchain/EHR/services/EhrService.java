@@ -39,7 +39,7 @@ public class EhrService {
                 for (byte b : hash) {
                     hexString.append(String.format("%02x", b));
                 }
-                if (!doctorService.addAccess(did, patientId, hexString.toString(), mspId)) {
+                if (doctorService.addAccess(did, patientId, hexString.toString(), mspId)) {
                     return ehrDocument;
                 }
             } catch (NoSuchAlgorithmException e) {

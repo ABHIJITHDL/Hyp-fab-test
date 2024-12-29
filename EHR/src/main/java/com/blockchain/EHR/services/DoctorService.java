@@ -34,17 +34,17 @@ public class DoctorService {
     private PatientRepository patientRepository;
 
     public List<PatientStatus> getPatientStatus(String did,String mspId) throws JsonProcessingException {
-        String[] args = {did};
-        String response = fabricService.submitTransaction("mychannel","ehr","getAllEHRRecordByDoctor",args,did,mspId);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(response);
-        List<PatientStatus> patientStatuses = new ArrayList<>();
-        for(JsonNode jsonNode:rootNode){
-           PatientStatus patientStatus= new PatientStatus();
-           patientStatus.setPid(jsonNode.path("patientId").asText());
-           patientStatus.setStatus(jsonNode.path("status").asText());
-           patientStatuses.add(patientStatus);
-        }
+//        String[] args = {did};
+//        String response = fabricService.submitTransaction("mychannel","ehr","getAllEHRRecordByDoctor",args,did,mspId);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        JsonNode rootNode = objectMapper.readTree(response);
+           List<PatientStatus> patientStatuses = new ArrayList<>();
+//        for(JsonNode jsonNode:rootNode){
+//           PatientStatus patientStatus= new PatientStatus();
+//           patientStatus.setPid(jsonNode.path("patientId").asText());
+//           patientStatus.setStatus(jsonNode.path("status").asText());
+//           patientStatuses.add(patientStatus);
+//        }
         List<Pending> pendingList = pendingRepository.findAllByDid(did);
         for(Pending pending : pendingList) {
             if (pending.getStatus().equals("Accepted")){
