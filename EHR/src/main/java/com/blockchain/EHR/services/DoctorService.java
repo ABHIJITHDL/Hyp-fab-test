@@ -1,5 +1,6 @@
 package com.blockchain.EHR.services;
 
+import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.PatientStatus;
 import com.blockchain.EHR.model.Pending;
@@ -18,6 +19,8 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.json.Json;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,15 +69,65 @@ public class DoctorService {
         pendingRepository.save(pending);
     }
 
+    public boolean updateEhr(String did, String patientId, String mspId,EhrDocument ehrDocument){
+        Patient patient = patientRepository.findById(patientId).orElse(null);
+        if (patient != null) {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(ehrDocument.toString().getBytes());
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    hexString.append(String.format("%02x", b));
+                }
+                if (addUpdate(did, patientId, hexString.toString(), mspId)) {
+                    patient.setEhrDocument(ehrDocument);
+                    patientRepository.save(patient);
+                    return true;
+                }
+            } catch (NoSuchAlgorithmException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     public boolean addAccess(String did,String pid,String hash,String mspId){
         String[] args = {pid,did};
         String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,did,mspId);
+        if(response.startsWith("Transaction"))
+            return false;
         try{
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response);
             if(rootNode.path("status").asText().equals("active")){
                 String[] access = {did,pid,hash, LocalDate.now().toString()};
                 String accessResponse = fabricService.submitTransaction("mychannel","ehr","recordAccess",access,did,mspId);
+                return !accessResponse.startsWith("Transaction");
+            }else{
+                return false;
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean addUpdate(String did,String pid,String hash,String mspId){
+        String[] args = {pid,did};
+        String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,did,mspId);
+        if(response.startsWith("Transaction"))
+            return false;
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(response);
+            if(rootNode.path("status").asText().equals("active")){
+                if(rootNode.get("status").toString().equals("active")) {
+                    return false;
+                }
+
+                String[] access = {did,pid,hash, LocalDate.now().toString()};
+
+                String accessResponse = fabricService.submitTransaction("mychannel","ehr","updateEHRRecord",access,did,mspId);
                 return !accessResponse.startsWith("Transaction");
             }else{
                 return false;

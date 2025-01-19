@@ -109,7 +109,7 @@ public class FabricController {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 EhrDocument ehrDocument = objectMapper.readValue(file.getInputStream(),EhrDocument.class);
-                ehrService.updateEhrDocument(username, ehrDocument);
+                ehrService.addEhrDocument(username, ehrDocument);
             } catch (Exception e) {
                 System.err.println("Error during PDF upload: " + e.getMessage());
                 return "Error During uploading pdf";

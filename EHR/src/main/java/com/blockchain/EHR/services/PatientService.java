@@ -27,6 +27,8 @@ public class PatientService {
     public List<String> getDoctors(String pid,String mspId) throws JsonProcessingException {
         String[] args = {pid};
         String response = fabricService.submitTransaction("mychannel","ehr","getAllEHRRecordByPatient",args,pid,mspId);
+        if(response.startsWith("Transaction"))
+            return new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(response);
         //To-Do : Create Object to receive Transaction result and manage error
@@ -59,28 +61,38 @@ public class PatientService {
         List<Pending> pendingsList= pendingRepository.findAllByPid(pid);
         List<String> doctors = new ArrayList<>();
         for (Pending pending: pendingsList){
-            doctors.add(pending.getDid());
+            if(pending.getStatus().equals("Requested"))
+                doctors.add(pending.getDid());
         }
         return doctors;
     }
 
     public void updateStatus(String pid, String did, String status,String mspId) {
         Pending pending = pendingRepository.findByPidAndDid(pid,did);
+        EhrDocument ehrDocument = ehrService.fetchPdf(pid);
+        String hash = ehrService.getHash(ehrDocument);
         System.out.println(status);
-        if(status.equals("Accept")){
-            System.out.println("Accepted");
+        String s;
+        if(status.equals("Accepted")){
             String[] args = {pid,did};
             String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,pid,mspId);
-            EhrDocument ehrDocument = ehrService.fetchPdf(pid);
-            String hash = ehrService.getHash(ehrDocument);
-            if(response.equals("Transaction failed")){
+            if(response.startsWith("Transaction")){
+                System.out.println("creating EHR");
                     String[] create = {did,pid,hash, LocalDate.now().toString()};
-                    fabricService.submitTransaction("mychannel","ehr","createEHRRecord",create,pid,mspId);
+                    s =fabricService.submitTransaction("mychannel","ehr","createEHRRecord",create,pid,mspId);
+                    if(s.startsWith("Transaction"))
+                        throw new RuntimeException("EHR creation failed:"+s);
+            }else {
+                String[] activate = {did, pid, hash, LocalDate.now().toString()};
+                s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
+                if (s.startsWith("Transaction"))
+                    throw new RuntimeException("EHR access update failed: "+s);
             }
-            else{
-                String[] update = {did,pid,LocalDate.now().toString()};
-                fabricService.submitTransaction("mychannel","ehr","activateAccess",update,pid,mspId);
-            }
+        }else if(status.equals("Revoke")) {
+            String[] activate = {did, pid,LocalDate.now().toString()};
+            s = fabricService.submitTransaction("mychannel", "ehr", "revokeAccess", activate, pid, mspId);
+            if (s.startsWith("Transaction"))
+                throw new RuntimeException("EHR revoke update failed: "+s);
         }
         pending.setStatus(status);
         pendingRepository.save(pending);

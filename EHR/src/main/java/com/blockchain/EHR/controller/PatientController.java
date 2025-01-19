@@ -129,18 +129,18 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
-    @PostMapping("/accept-request/{pid}")
-    ResponseEntity<String>acceptRequests(@PathVariable String pid){
-        List<Pending>toAcceptList=new ArrayList<>();
-        toAcceptList=pendingRepository.findAllByPid(pid);
-        for (Pending accept:toAcceptList
-             ) {
-            accept.setStatus("approved");
-            return ResponseEntity.ok("Request approved for doctor"+accept.getDid());
-        }
-        return ResponseEntity.ok("Request approved for ");
-    }
+//
+//    @PostMapping("/accept-request/{pid}")
+//    ResponseEntity<String>acceptRequests(@PathVariable String pid){
+//        List<Pending>toAcceptList=new ArrayList<>();
+//        toAcceptList=pendingRepository.findAllByPid(pid);
+//        for (Pending accept:toAcceptList
+//             ) {
+//            accept.setStatus("approved");
+//            return ResponseEntity.ok("Request approved for doctor"+accept.getDid());
+//        }
+//        return ResponseEntity.ok("Request approved for ");
+//    }
 
 
 }

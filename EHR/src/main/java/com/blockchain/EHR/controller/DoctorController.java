@@ -150,15 +150,10 @@ public class DoctorController {
                                             @RequestBody EhrDocument updatedEhrDocument) {
         String jwt = jwtUtils.getJwtFromHeader(request);
         String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
-
-        // Check access approval
-        if (!ehrService.isAccessApproved(patientId, did)) {
-            System.out.println("Access denied. Doctor not approved to update.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
-        }
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
 
         // Update the EHR document
-        boolean isUpdated = ehrService.updateEhrDocument(patientId, updatedEhrDocument);
+        boolean isUpdated = doctorService.updateEhr(did,patientId,mspId,updatedEhrDocument);
         if (isUpdated) {
             System.out.println("EHR document updated successfully!");
             return ResponseEntity.ok("EHR document updated successfully!");

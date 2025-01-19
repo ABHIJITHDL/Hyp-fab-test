@@ -48,6 +48,13 @@ public class EhrService {
         }
         return null;
     }
+    public void addEhrDocument(String patientId,EhrDocument document){
+        Patient patient = new Patient();
+        patient.setPatientId(patientId);
+        patient.setEhrId(patientId);
+        patient.setEhrDocument(document);
+        patientRepository.save(patient);
+    }
 
     public boolean updateEhrDocument(String patientId, EhrDocument updatedEhrDocument) {
         Optional<Patient> patientOptional = patientRepository.findById(patientId);
@@ -71,9 +78,6 @@ public class EhrService {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(ehrDocument.toString().getBytes());
             StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                hexString.append(String.format("%02x", b));
-            }
             for (byte b : hash) {
                 hexString.append(String.format("%02x", b));
             }
