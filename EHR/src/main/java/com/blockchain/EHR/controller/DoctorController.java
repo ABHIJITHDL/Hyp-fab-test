@@ -83,53 +83,6 @@ public class DoctorController {
 
     }
 
-//    // View EHR document (only if pending request status is 'Accepted')
-//    @GetMapping("/view-ehr")
-//    public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {
-//        String jwt = jwtUtils.getJwtFromHeader(request);
-//        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
-//
-//        // Check if the request status is 'Accepted'
-//        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
-//        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Access denied
-//        }
-//
-//        // Fetch the patient's EHR document
-//        Optional<Patient> patientOptional = patientRepository.findById(patientId);
-//        if (patientOptional.isPresent()) {
-//            EhrDocument ehrDocument = patientOptional.get().getEhrDocument();
-//            return ResponseEntity.ok(ehrDocument);
-//        } else {
-//            return ResponseEntity.notFound().build(); // Patient not found
-//        }
-//    }
-//
-//
-//    // Update EHR document (only by approved doctors)
-//    @PostMapping("/update-ehr")
-//    public ResponseEntity<String> updateEhr(HttpServletRequest request, @RequestParam String patientId,
-//                                            @RequestBody EhrDocument updatedEhrDocument) {
-//        String jwt = jwtUtils.getJwtFromHeader(request);
-//        String did = jwtUtils.getUserNameFromJwtToken(jwt); // Get doctor ID from JWT
-//x
-//        // Check if the request status is 'Accepted'
-//        Pending pendingRequest = pendingRepository.findByPidAndDid(patientId, did);
-//        if (pendingRequest == null || !"Accepted".equalsIgnoreCase(pendingRequest.getStatus())) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Doctor not approved to update.");
-//        }
-//
-//        // Fetch the patient's record and update the EHR document
-//        Optional<Patient> patientOptional = patientRepository.findById(patientId);
-//        if (patientOptional.isPresent()) {
-//            Patient patient = patientOptional.get();
-//            patient.setEhrDocument(updatedEhrDocument); // Update the EHR document
-//            patientRepository.save(patient); // Save the updated patient record
-//            return ResponseEntity.ok("EHR document updated successfully!");
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found.");
-//        }
-//    }
     // View EHR document (only if pending request status is 'Accepted')
     @GetMapping("/view-ehr")
     public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request, @RequestParam String patientId) {

@@ -106,7 +106,7 @@ public class FabricUserRegistration {
         try {
             // Load the JSON configuration file
             ObjectMapper mapper = new ObjectMapper();
-            String connectionProfilePath = String.format("EHR/src/main/resources/static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase());
+            String connectionProfilePath = String.format("src/main/resources/static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase());
             File connectionProfileFile = new File(connectionProfilePath);
             JsonNode connectionProfile = mapper.readTree(connectionProfileFile);
 
@@ -149,7 +149,7 @@ public class FabricUserRegistration {
     private  void saveUserCredentials(String username, Enrollment enrollment, String mspId) throws Exception {
         String org = getOrganizationFromMSP(mspId);
         // Define the wallet directory
-        String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/"+org+"/wallet";
+        String WALLET_PATH = "src/main/resources/static/connection-profiles/"+org+"/wallet";
         File walletDir = new File(WALLET_PATH);
         if (!walletDir.exists()) {
             walletDir.mkdirs();

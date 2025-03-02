@@ -1,6 +1,5 @@
-docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+# docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 
-docker rmi $(docker images | grep dev)
 
 #!/bin/bash
 
@@ -15,3 +14,4 @@ docker rmi $(docker images | grep dev)
 
 # # Remove any existing channel artifacts
 # rm -rf ./channel-artifacts/*
+

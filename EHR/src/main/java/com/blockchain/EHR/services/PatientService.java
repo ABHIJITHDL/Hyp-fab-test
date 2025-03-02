@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.blockchain.EHR.repository.PatientRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class PatientService {
     private FabricService fabricService;
     @Autowired
     private PendingRepository pendingRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Autowired
     private EhrService ehrService;
@@ -96,5 +100,9 @@ public class PatientService {
         }
         pending.setStatus(status);
         pendingRepository.save(pending);
+    }
+
+    public EhrDocument getEhr(String pid) {
+        return patientRepository.findById(pid).orElseThrow().getEhrDocument();
     }
 }
