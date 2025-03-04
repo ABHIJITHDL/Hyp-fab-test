@@ -1,10 +1,15 @@
 package com.blockchain.EHR.jwt;
 
+import com.blockchain.EHR.model.UserEntity;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Getter
 public class CustomUserDetails implements UserDetails {
 
@@ -13,11 +18,13 @@ public class CustomUserDetails implements UserDetails {
     private final String mspId;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(String username, String password, String mspId, Collection<? extends GrantedAuthority> authorities) {
-        this.username = username;
-        this.password = password;
-        this.mspId = mspId;
-        this.authorities = authorities;
+    public CustomUserDetails(UserEntity user) {
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.mspId = user.getMspId();
+        this.authorities = Stream.of(user.getRole().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -33,10 +33,10 @@ public class JwtUtils {
         return null;
     }
 
-    public String generateTokenFromUserDetails(CustomUserDetails userDetails) {
+    public String generateTokenFromUserDetails(String username,String mspId) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("mspId", userDetails.getMspId())
+                .setSubject(username)
+                .claim("mspId", mspId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key())

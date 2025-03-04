@@ -20,7 +20,7 @@ import java.util.Properties;
 import static com.blockchain.EHR.services.FabricUserRegistration.getCAConfig;
 import static org.bouncycastle.asn1.x509.X509ObjectIdentifiers.organization;
 
-@Component
+
 public class CAAuthenticationProvider implements AuthenticationProvider {
 
     FabricUserRegistration fabricUserRegistration;

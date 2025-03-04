@@ -11,12 +11,12 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     loginData.append('mspId', mspId);
 
     fetch('/fabric/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: loginData.toString()
-    })
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        })
     .then(response => {
         if (response.ok) {
             return response.text(); // Assuming the response contains the JWT as plain text

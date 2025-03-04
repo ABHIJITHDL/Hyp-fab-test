@@ -1,27 +1,31 @@
 package com.blockchain.EHR.controller;
 
 import com.blockchain.EHR.jwt.CustomUserDetails;
+import com.blockchain.EHR.jwt.CustomUsernamePasswordAuthenticationToken;
 import com.blockchain.EHR.jwt.JwtUtils;
 import com.blockchain.EHR.model.EhrDocument;
+import com.blockchain.EHR.model.LoginRequest;
 import com.blockchain.EHR.model.Patient;
-import com.blockchain.EHR.services.EhrService;
-import com.blockchain.EHR.services.FabricService;
-import com.blockchain.EHR.services.FabricUserRegistration;
-import com.blockchain.EHR.services.PdfService;
+import com.blockchain.EHR.model.UserEntity;
+import com.blockchain.EHR.services.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.kernel.pdf.annot.Pdf3DAnnotation;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,34 +34,25 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/fabric")
+@AllArgsConstructor
 public class FabricController {
     private final EhrService ehrService;
     private final FabricService fabricService;
-    private final FabricUserRegistration fabricUserRegistration;
+    private final UserInfoService userInfoService;
     private final JwtUtils jwtUtils;
-
-    public FabricController(EhrService ehrService, FabricService fabricService, FabricUserRegistration fabricUserRegistration, JwtUtils jwtUtils) {
-        this.ehrService = ehrService;
-        this.fabricService = fabricService;
-        this.fabricUserRegistration = fabricUserRegistration;
-        this.jwtUtils = jwtUtils;
-    }
+    private final AuthenticationManager authenticationManager;
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username,
-                                        @RequestParam String password,
-                                        @RequestParam String mspId) {
-        if (fabricUserRegistration.authenticateUser(username, password, mspId)) {
-            System.out.println("FabricUserRegistration works");
-            CustomUserDetails userDetails = new CustomUserDetails(username, password, mspId, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+    public String login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new CustomUsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword(),null,loginRequest.getMspId()));
 
-            // Generate JWT using JwtUtils
-            String jwt = jwtUtils.generateTokenFromUserDetails(userDetails);
-
-            return ResponseEntity.ok(jwt);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+        if(authentication.isAuthenticated()){
+            return jwtUtils.generateTokenFromUserDetails(loginRequest.getUsername(),loginRequest.getMspId());
+        }
+        else {
+            throw new UsernameNotFoundException("Invalid user request");
         }
     }
 
@@ -117,7 +112,11 @@ public class FabricController {
         }
 
         System.out.println("Received");
-        if(fabricUserRegistration.addUser(username, password,mspId))
+        if(userInfoService.addUser(UserEntity.builder()
+                .username(username)
+                .password(password)
+                .mspId(mspId)
+                .build()))
             return "User registered successfully";
         else
             return  "User registration failed";
