@@ -8,7 +8,7 @@ import java.util.Collection;
 @Getter
 public class CustomUsernamePasswordAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
-    private String mspId;
+    private final String mspId;
 
     public CustomUsernamePasswordAuthenticationToken(Object principal, Object credentials,
                                                      Collection<? extends GrantedAuthority> authorities, String mspId) {

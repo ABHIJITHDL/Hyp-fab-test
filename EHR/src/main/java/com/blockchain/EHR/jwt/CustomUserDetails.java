@@ -22,7 +22,7 @@ public class CustomUserDetails implements UserDetails {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.mspId = user.getMspId();
-        this.authorities = Stream.of(user.getRole().split(","))
+        this.authorities = Stream.of(user.getRole() != null ? user.getRole().split(",") : new String[]{"USER"})
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
