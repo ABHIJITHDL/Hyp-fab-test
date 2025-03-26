@@ -359,7 +359,6 @@
         });
     }
 
-    // Add request to a patient
     function addRequest() {
         if (isSubmitting) return; // Prevent multiple submissions
         isSubmitting = true;
@@ -372,23 +371,22 @@
         }
 
         showLoading();
-        // Make a call to add the request via backend
+
         fetch(`/fabric/doctor/add-request?pid=${patientId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}` // Assuming JWT is stored in localStorage
+                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
             }
         })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();
+            return response.status; // Only returning status
         })
-        .then(data => {
+        .then(() => {
             alert("Request added successfully!");
-            // Optionally, refresh the patient list
             window.location.reload();
         })
         .catch(error => {
@@ -396,9 +394,10 @@
         })
         .finally(() => {
             hideLoading();
-            isSubmitting = false; // Reset the flag after the request is complete
+            isSubmitting = false;
         });
     }
+
 
     // Handle logout button click
     document.getElementById('logoutButton').addEventListener('click', function() {

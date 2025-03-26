@@ -7,6 +7,7 @@ import com.blockchain.EHR.model.LoginRequest;
 import com.blockchain.EHR.model.UserEntity;
 import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.FabricService;
+import com.blockchain.EHR.services.FabricUserRegistration;
 import com.blockchain.EHR.services.UserInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ public class FabricController {
     private final UserInfoService userInfoService;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
+    private final FabricUserRegistration fabricUserRegistration;
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
@@ -110,7 +112,7 @@ public String login(@RequestBody LoginRequest loginRequest) {
                 .username(username)
                 .password(password)
                 .mspId(mspId)
-                .build()))
+                .build()) && fabricUserRegistration.addUser(username,password,mspId))
             return "User registered successfully";
         else
             return  "User registration failed";

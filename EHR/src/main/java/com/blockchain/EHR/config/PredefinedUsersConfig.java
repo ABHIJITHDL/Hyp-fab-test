@@ -22,14 +22,14 @@ public class PredefinedUsersConfig {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); // Use a separate instance
         UserEntity user1 = UserEntity.builder()
                 .username("admin")
-                .password(passwordEncoder.encode("adminpw")) // Encode password here
+                .password("adminpw") // Encode password here
                 .mspId("Org1MSP")
                 .role("ADMIN")
                 .build();
 
         UserEntity user2 = UserEntity.builder()
                 .username("admin")
-                .password(passwordEncoder.encode("adminpw")) // Encode password here
+                .password("adminpw") // Encode password here
                 .mspId("Org2MSP")
                 .role("ADMIN")
                 .build();
