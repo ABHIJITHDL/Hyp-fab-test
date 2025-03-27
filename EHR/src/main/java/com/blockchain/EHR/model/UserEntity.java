@@ -1,24 +1,21 @@
 package com.blockchain.EHR.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 
-
-@Entity
-@Table(name = "users")
+@Data
+@Document(collection = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -29,6 +26,5 @@ public class UserEntity {
     @Column(nullable = false)
     private String mspId;
 
-    @Column(nullable = false)
     private String role;
 }

@@ -2,20 +2,23 @@ package com.blockchain.EHR.config;
 
 import com.blockchain.EHR.jwt.AuthEntryPointJwt;
 import com.blockchain.EHR.jwt.AuthTokenFilter;
-import com.blockchain.EHR.jwt.CAAuthenticationProvider;
+import com.blockchain.EHR.jwt.CustomAuthenticationProvider;
+import com.blockchain.EHR.jwt.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -24,49 +27,48 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CAAuthenticationProvider caAuthenticationProvider;
-    private final AuthEntryPointJwt unauthorizedHandler;
-    private final AuthTokenFilter authTokenFilter;
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-    public SecurityConfig(CAAuthenticationProvider caAuthenticationProvider, AuthEntryPointJwt unauthorizedHandler, AuthTokenFilter authTokenFilter) {
-        this.caAuthenticationProvider = caAuthenticationProvider;
-        this.unauthorizedHandler = unauthorizedHandler;
-        this.authTokenFilter = authTokenFilter;
-    }
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
+
+    @Autowired
+    @Lazy
+    private CustomAuthenticationProvider customAuthenticationProvider;
+
+    @Autowired
+    private AuthTokenFilter authTokenFilter;
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        logger.info("Configuring SecurityFilterChain");
         http
-                .cors(AbstractHttpConfigurer::disable)  // Disable CORS
-                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))  // Handle unauthorized access
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Stateless sessions
+                .cors(Customizer.withDefaults())  // Use default CORS configuration
+                .csrf(csrf -> csrf.disable())  // Disable CSRF more cleanly
+                .exceptionHandling(exceptionHandling -> 
+                    exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> 
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/fabric/login/**").permitAll()
-                                .requestMatchers("/*.html", "/*.css", "/*.js").permitAll()  // Allow access to static files
-//                              .requestMatchers("/fabric/login").permitAll()
-                                .anyRequest().authenticated()
-                );
-        http.csrf(csrf -> csrf
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/**"))
-                .ignoringRequestMatchers(new AntPathRequestMatcher("/fabric/login")));
-        http.cors(Customizer.withDefaults());
-        // Ensure the authTokenFilter does not interfere with /fabric/login
-        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
+                        .requestMatchers("/*.html", "/*.css", "/*.js", "/script.js").permitAll()
+                        .requestMatchers("/fabric/login").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().authenticated())
+                .authenticationProvider(customAuthenticationProvider)  // Use the customAuthenticationProvider
+                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                
         return http.build();
     }
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
 
-    public void configureAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(caAuthenticationProvider);
+    @Bean
+    @Lazy
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager();  // A placeholder; not used in JWT-based systems
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        logger.info("Creating AuthenticationManager");
+        return configuration.getAuthenticationManager();
     }
 }

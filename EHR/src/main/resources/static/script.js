@@ -5,18 +5,19 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     const password = document.getElementById('password').value;
     const mspId = document.getElementById('mspId').value;
 
-    const loginData = new URLSearchParams();
-    loginData.append('username', username);
-    loginData.append('password', password);
-    loginData.append('mspId', mspId);
+    const loginData = {
+            username: username,
+            password: password,
+            mspId: mspId
+        };
 
-    fetch('/fabric/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: loginData.toString()
-    })
+        fetch('/fabric/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        })
     .then(response => {
         if (response.ok) {
             return response.text(); // Assuming the response contains the JWT as plain text
