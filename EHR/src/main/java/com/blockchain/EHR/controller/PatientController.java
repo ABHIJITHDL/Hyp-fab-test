@@ -107,6 +107,4 @@ public class PatientController {
         return patientService.getEhr(pid);
     }
 
-
 }
-
