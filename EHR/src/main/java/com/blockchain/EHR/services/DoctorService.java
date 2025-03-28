@@ -69,29 +69,6 @@ public class DoctorService {
         pendingRepository.save(pending);
     }
 
-    public boolean updateEhr(String did, String patientId, String mspId,EhrDocument ehrDocument){
-        Patient patient = patientRepository.findById(patientId).orElse(null);
-        if (patient != null) {
-            try {
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] hash = digest.digest(ehrDocument.toString().getBytes());
-                StringBuilder hexString = new StringBuilder();
-                for (byte b : hash) {
-                    hexString.append(String.format("%02x", b));
-                }
-                if (addUpdate(did, patientId, hexString.toString(), mspId)) {
-                    patient.setEhrDocument(ehrDocument);
-                    patientRepository.save(patient);
-                    return true;
-                }
-            } catch (NoSuchAlgorithmException e) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
     public boolean addAccess(String did,String pid,String hash,String mspId){
         String[] args = {pid,did};
         String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,did,mspId);

@@ -51,35 +51,6 @@ public class PatientController {
     @Autowired
     com.blockchain.EHR.repository.PendingRepository pendingRepository;
 
-//    @PostMapping("/upload")
-//    public ResponseEntity<?> uploadPdf(@RequestParam("pid")String pid,
-//                                       @RequestParam("file")MultipartFile pdf){
-//        System.out.println("Received upload request for PID: " + pid);
-//        try {
-//            Patient patient = pdfService.upload(pid, pdf);
-//            System.out.println("PDF uploaded successfully: " + patient.getPatientId());
-//            return new ResponseEntity<>(patient, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            System.err.println("Error during PDF upload: " + e.getMessage());
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//    @GetMapping("/pdf")
-//    public ResponseEntity<byte[]> getPdf(@PathVariable String pid) {
-//        Optional<Patient> patientOptional = patientRepository.findById(pid);
-//
-//        if (patientOptional.isPresent()) {
-//            byte[] pdfFile = patientOptional.get().getPdfData();
-//
-//            // Set the appropriate content type for PDF
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=patient_" + pid + ".pdf")
-//                    .contentType(MediaType.APPLICATION_PDF)
-//                    .body(pdfFile);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 
     @GetMapping("/accepted")
     public ResponseEntity<List<String>> getAcceptedDoctors(HttpServletRequest request) {
@@ -129,19 +100,6 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-//
-//    @PostMapping("/accept-request/{pid}")
-//    ResponseEntity<String>acceptRequests(@PathVariable String pid){
-//        List<Pending>toAcceptList=new ArrayList<>();
-//        toAcceptList=pendingRepository.findAllByPid(pid);
-//        for (Pending accept:toAcceptList
-//             ) {
-//            accept.setStatus("approved");
-//            return ResponseEntity.ok("Request approved for doctor"+accept.getDid());
-//        }
-//        return ResponseEntity.ok("Request approved for ");
-//    }
-
 
 }
 
