@@ -82,8 +82,12 @@ public class PatientController {
         String jwt = jwtUtils.getJwtFromHeader(request);
         String pid = jwtUtils.getUserNameFromJwtToken(jwt);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
-        patientService.updateStatus(pid,did,status,mspId);
-}
+        try {
+            patientService.updateStatus(pid,did,status,mspId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @GetMapping("/history/{did}")
     public ResponseEntity<List<Transaction>> getDoctorHistory(HttpServletRequest request, @PathVariable String did) {

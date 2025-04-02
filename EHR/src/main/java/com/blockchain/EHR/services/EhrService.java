@@ -3,13 +3,18 @@ package com.blockchain.EHR.services;
 import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.Pending;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Optional;
 
 @Service
@@ -71,7 +76,7 @@ public class EhrService {
                 String decryptedEhrJson = decrypt(encryptedEhr); // Decrypt JSON
 
                 EhrDocument ehrDocument = objectMapper.readValue(decryptedEhrJson, EhrDocument.class);
-
+                System.out.println(decryptedEhrJson);
                 // Generate SHA-256 hash
                 MessageDigest digest = MessageDigest.getInstance("SHA-256");
                 byte[] hash = digest.digest(decryptedEhrJson.getBytes());
@@ -82,6 +87,7 @@ public class EhrService {
 
                 // Add access control check
                 if (doctorService.addAccess(did, patientId, hexString.toString(), mspId)) {
+                    System.out.println("Add access");
                     return ehrDocument;
                 }
             } catch (Exception e) {
@@ -101,23 +107,29 @@ public class EhrService {
                 for (byte b : hash) {
                     hexString.append(String.format("%02x", b));
                 }
-                if (addUpdate(did, patientId, hexString.toString(), mspId)) {
-                    patient.setEhrDocument(ehrDocument);
+                if (doctorService.addUpdate(did, patientId, hexString.toString(), mspId)) {
+                    String ehrJson = objectMapper.writeValueAsString(ehrDocument);
+                    String encrypted = encrypt(ehrJson);
+                    patient.setEhrDocument(encrypted);
                     patientRepository.save(patient);
                     return true;
                 }
             } catch (NoSuchAlgorithmException e) {
                 return false;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
 
         return false;
     }
 
-    public EhrDocument fetchPdf(String pid) {
+    public EhrDocument fetchPdf(String pid) throws Exception {
     Patient patient = patientRepository.findById(pid)
             .orElseThrow(() -> new EntityNotFoundException("Patient not found with ID: " + pid));
-    return patient.getEhrDocument();
+    String encryptedEHR = patient.getEhrDocument();
+
+    return objectMapper.readValue(decrypt(encryptedEHR),EhrDocument.class);
     }
 
     public String getHash(EhrDocument ehrDocument){

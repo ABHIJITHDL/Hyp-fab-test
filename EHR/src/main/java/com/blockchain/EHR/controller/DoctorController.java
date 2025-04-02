@@ -92,6 +92,7 @@ public class DoctorController {
         // Fetch the EHR document
         EhrDocument ehrDocument= ehrService.getEhrDocument(patientId,did,mspId);
         if(ehrDocument!=null){
+            System.out.println("Returning document");
             return new ResponseEntity<>(ehrDocument,HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

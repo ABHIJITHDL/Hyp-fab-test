@@ -17,5 +17,5 @@ public class Patient {
     @Id
     private String patientId;
     private String ehrId;
-    private EhrDocument ehrDocument;
+    private String ehrDocument;
 }

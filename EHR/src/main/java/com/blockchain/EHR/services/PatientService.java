@@ -67,7 +67,7 @@ public class PatientService {
         return doctors;
     }
 
-    public void updateStatus(String pid, String did, String status,String mspId) {
+    public void updateStatus(String pid, String did, String status,String mspId) throws Exception {
         Pending pending = pendingRepository.findByPidAndDid(pid,did);
         EhrDocument ehrDocument = ehrService.fetchPdf(pid);
         String hash = ehrService.getHash(ehrDocument);
