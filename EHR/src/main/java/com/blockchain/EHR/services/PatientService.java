@@ -83,7 +83,7 @@ public class PatientService {
                     if(s.startsWith("Transaction"))
                         throw new RuntimeException("EHR creation failed:"+s);
             }else {
-                String[] activate = {did, pid, hash, LocalDate.now().toString()};
+                String[] activate = {did, pid, LocalDate.now().toString()};
                 s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
                 if (s.startsWith("Transaction"))
                     throw new RuntimeException("EHR access update failed: "+s);

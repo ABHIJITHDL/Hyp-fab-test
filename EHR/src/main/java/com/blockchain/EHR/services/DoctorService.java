@@ -62,11 +62,17 @@ public class DoctorService {
     }
 
     public void addRequest(String did,String pid){
-        Pending pending = new Pending();
-        pending.setPid(pid);
-        pending.setDid(did);
-        pending.setStatus("Requested");
-        pendingRepository.save(pending);
+        Pending pendingExists = pendingRepository.findByPidAndDid(pid,did);
+        if(pendingExists==null) {
+            Pending pending = new Pending();
+            pending.setPid(pid);
+            pending.setDid(did);
+            pending.setStatus("Requested");
+            pendingRepository.save(pending);
+        }else{
+            pendingExists.setStatus("Requested");
+            pendingRepository.save(pendingExists);
+        }
     }
 
     public boolean addAccess(String did,String pid,String hash,String mspId){
