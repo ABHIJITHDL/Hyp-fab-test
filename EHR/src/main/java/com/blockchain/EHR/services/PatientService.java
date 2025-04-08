@@ -85,6 +85,9 @@ public class PatientService {
 
     public void updateStatus(String pid, String did, String status,String mspId) throws Exception {
         Pending pending = pendingRepository.findByPidAndDid(pid,did);
+        if (pending == null) {
+            throw new RuntimeException("No pending record found for pid: " + pid + " and did: " + did);
+        }
         System.out.println(pid + " " + did+ " "+pending);
         EhrDocument ehrDocument = ehrService.fetchPdf(pid);
         String hash = ehrService.getHash(ehrDocument);
@@ -108,7 +111,7 @@ public class PatientService {
 
         }else if (status.equals("Activate")) {
             String[] activate = {did, pid, LocalDate.now().toString()};
-            s = fabricService.submitTransaction("mychannel", "ehr", "revokeAccess", activate, pid, mspId);
+            s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
             if (s.startsWith("Transaction"))
                 throw new RuntimeException("EHR revoke update failed: " + s);
 //            Contract contract = fabricService.getContract("mychannel", "ehr", pid, mspId);

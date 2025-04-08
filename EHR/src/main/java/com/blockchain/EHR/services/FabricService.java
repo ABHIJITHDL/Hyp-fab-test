@@ -76,9 +76,17 @@ public class FabricService {
 //    }
 
     public String submitTransaction(String channelName, String chaincodeName, String functionName, String[] args, String username, String mspId) {
+        GatewayChannelPair gatewayChannelPair = null;
         try {
             logger.debug("Fetching contract for channel: {}, chaincode: {}, user: {}", channelName, chaincodeName, username);
-            Contract contract = getContract(channelName, chaincodeName, username, mspId);
+            gatewayChannelPair = fabricGatewayService.getFabricGateway(username, mspId);
+            if (gatewayChannelPair == null) {
+                logger.error("Gateway not found for user: {}", username);
+                return "Gateway not found";
+            }
+            Gateway gateway = gatewayChannelPair.gateway();
+            Network network = gateway.getNetwork(channelName);
+            Contract contract = network.getContract(chaincodeName);
 
             logger.info("Building proposal for function: {} with args: {}", functionName, args);
             Proposal proposal = contract.newProposal(functionName)
@@ -119,6 +127,19 @@ public class FabricService {
         } catch (Exception e) {
             logger.error("Unexpected error during transaction submission", e);
             return "Transaction failed: " + e.getMessage();
+        }finally {
+            if (gatewayChannelPair != null) {
+                try {
+                    gatewayChannelPair.gateway().close();
+                } catch (Exception e) {
+                    logger.error("Error closing Gateway: {}", e.getMessage());
+                }
+                try {
+                    gatewayChannelPair.channel().shutdown();
+                } catch (Exception e) {
+                    logger.error("Error shutting down ManagedChannel: {}", e.getMessage());
+                }
+            }
         }
     }
 
