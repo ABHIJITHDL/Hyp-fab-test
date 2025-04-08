@@ -12,4 +12,5 @@ public interface PendingRepository extends MongoRepository<Pending,String> {
     public List<Pending> findAllByDid(String did);
     public Pending findByPidAndDid(String pid,String did);
     public List<Pending> findAllByPid(String pid);
+    public List<Pending> findAllByStatus(String status);
 }

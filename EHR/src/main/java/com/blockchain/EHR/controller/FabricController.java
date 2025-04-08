@@ -34,23 +34,23 @@ public class FabricController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-public String login(@RequestBody LoginRequest loginRequest) {
-    Authentication authentication = authenticationManager.authenticate(
-            new CustomUsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword(),
-                    null,
-                    loginRequest.getMspId()
-            )
-    );
+    public String login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new CustomUsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword(),
+                        null,
+                        loginRequest.getMspId()
+                )
+        );
 
-    if (authentication.isAuthenticated()) {
-        System.out.println("User " + loginRequest.getUsername() + " is authenticated");
-        return jwtUtils.generateTokenFromUserDetails(loginRequest.getUsername(), loginRequest.getMspId());
-    } else {
-        throw new UsernameNotFoundException("Invalid user request");
+        if (authentication.isAuthenticated()) {
+            System.out.println("User " + loginRequest.getUsername() + " is authenticated");
+            return jwtUtils.generateTokenFromUserDetails(loginRequest.getUsername(), loginRequest.getMspId());
+        } else {
+            throw new UsernameNotFoundException("Invalid user request");
+        }
     }
-}
 
     @PostMapping("/submit")
     public String submitTransaction(HttpServletRequest request,

@@ -53,19 +53,30 @@ public class PatientController {
 
 
     @GetMapping("/accepted")
-    public ResponseEntity<List<String>> getAcceptedDoctors(HttpServletRequest request) {
+    public ResponseEntity<List<Pending>> getAcceptedDoctors(HttpServletRequest request) {
         String jwt = jwtUtils.getJwtFromHeader(request);
         String pid = jwtUtils.getUserNameFromJwtToken(jwt);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
 
         try {
-            List<String> doctorIds = patientService.getDoctors(pid, mspId);
+            List<Pending> doctorIds = patientService.getDoctors(pid, mspId);
             return new ResponseEntity<>(doctorIds, HttpStatus.OK);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @GetMapping("/revoked")
+    public ResponseEntity<List<String>> getRevokedDoctors(HttpServletRequest request) {
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String pid = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+
+        List<String> doctorIds = patientService.getRevokedDoctors(pid, mspId);
+        return new ResponseEntity<>(doctorIds, HttpStatus.OK);
+    }
+
 
     @GetMapping("/request")
     public List<String> getPendingRequests(HttpServletRequest request){

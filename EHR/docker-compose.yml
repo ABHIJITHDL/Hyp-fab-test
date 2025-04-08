@@ -8,8 +8,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
+#    volumes:
+#      - mongo-data:/data/db
+#
+#volumes:
+#  mongo-data:

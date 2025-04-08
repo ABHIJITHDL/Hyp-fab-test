@@ -76,17 +76,10 @@ public class EhrService {
                 String decryptedEhrJson = decrypt(encryptedEhr); // Decrypt JSON
 
                 EhrDocument ehrDocument = objectMapper.readValue(decryptedEhrJson, EhrDocument.class);
-                System.out.println(decryptedEhrJson);
-                // Generate SHA-256 hash
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] hash = digest.digest(decryptedEhrJson.getBytes());
-                StringBuilder hexString = new StringBuilder();
-                for (byte b : hash) {
-                    hexString.append(String.format("%02x", b));
-                }
+                String hash = getHash(ehrDocument);
 
                 // Add access control check
-                if (doctorService.addAccess(did, patientId, hexString.toString(), mspId)) {
+                if (doctorService.addAccess(did, patientId, hash, mspId)) {
                     System.out.println("Add access");
                     return ehrDocument;
                 }

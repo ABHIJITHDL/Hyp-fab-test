@@ -59,6 +59,7 @@ public class FabricUserRegistration {
             // Step 3: Register and enroll the new user
 
             registerAndEnrollUser(caClient, admin, username, password,mspId);
+            System.out.println("User "+ username+ " Registered");
             return true;
         } catch (Exception e) {
             e.getMessage();

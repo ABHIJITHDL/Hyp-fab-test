@@ -187,7 +187,7 @@ chaincodeInvoke(){
             --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} \
             --peerAddresses localhost:7051 --tlsRootCertFiles $PEER0_ORG1_CA \
             --peerAddresses localhost:9051 --tlsRootCertFiles $PEER0_ORG2_CA  \
-        -c '{"function": "getEHRRecord","Args": ["D01","P01"]}'
+        -c '{"function": "activateAccess","Args": ["D01","P01","2025-04-08T12:00:00Z"]}'
 
 
     ## Create Car
@@ -225,7 +225,7 @@ chaincodeQuery(){
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createMyAsset","Args":["ID2","TEST2"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "readMyAsset","Args":["ID"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "createEHRRecord","Args":["ehr02", "D01", "P02", "hash222"]}'
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "getAllEHRRecordByPatient","Args": ["D01"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"function": "activateAccess","Args": ["D01","P01","2025-04-08T12:00:00Z"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["createMyAsset","ID","Test"]}'
     # peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["readMyAsset","ID"]}'
     #'{"Args":["GetSampleData","Key1"]}'
@@ -234,17 +234,17 @@ chaincodeQuery(){
 
 #presetup
 # packageChaincode
- installChaincode
- queryInstalled
- approveForMyOrg1
- checkCommitReadyness
- approveForMyOrg2
- checkCommitReadyness
- commitChaincodeDefination
- queryCommitted
- sleep 3
- chaincodeInvokeInit
+# installChaincode
+# queryInstalled
+# approveForMyOrg1
+# checkCommitReadyness
+# approveForMyOrg2
+# checkCommitReadyness
+# commitChaincodeDefination
+# queryCommitted
+# sleep 3
+# chaincodeInvokeInit
 # sleep 5
 # chaincodeInvoke
 # sleep 3
-# chaincodeQuery
+ chaincodeQuery
