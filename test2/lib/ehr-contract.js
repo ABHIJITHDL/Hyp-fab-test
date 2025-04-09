@@ -82,7 +82,7 @@ class EhrContract extends Contract {
         return JSON.stringify(ehrRecord);
     }
 
-    async revokeAccess(ctx, doctorId, patientId,timestamp) {
+    async revokeAccess(ctx, doctorId, patientId, hash, timestamp) {
         const compositeKey = ctx.stub.createCompositeKey('EHR', [patientId, doctorId]);
         const recordJSON = await ctx.stub.getState(compositeKey);
         
@@ -96,14 +96,15 @@ class EhrContract extends Contract {
         // Add a revoke transaction entry
         ehrRecord.transactions.push({
             type: 'revoke',
-            timestamp
+            timestamp,
+            hash
         });
 
         await ctx.stub.putState(compositeKey, Buffer.from(JSON.stringify(ehrRecord)));
         return JSON.stringify(ehrRecord);
     }
 
-    async activateAccess(ctx, doctorId, patientId,timestamp) {
+    async activateAccess(ctx, doctorId, patientId, hash, timestamp) {
         const compositeKey = ctx.stub.createCompositeKey('EHR', [patientId, doctorId]);
         const recordJSON = await ctx.stub.getState(compositeKey);
 
@@ -115,7 +116,8 @@ class EhrContract extends Contract {
         ehrRecord.status = 'active';
         ehrRecord.transactions.push({
             type: 'activate',
-            timestamp
+            timestamp,
+            hash
         });
         await ctx.stub.putState(compositeKey, Buffer.from(JSON.stringify(ehrRecord)));
         return JSON.stringify(ehrRecord);

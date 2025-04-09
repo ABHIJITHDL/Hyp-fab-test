@@ -11,6 +11,7 @@ import org.hyperledger.fabric_ca.sdk.Attribute;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.HFCAIdentity;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.SSLContext;
@@ -107,8 +108,8 @@ public class FabricUserRegistration {
         try {
             // Load the JSON configuration file
             ObjectMapper mapper = new ObjectMapper();
-            String connectionProfilePath = String.format("EHR/src/main/resources/static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase());
-            File connectionProfileFile = new File(connectionProfilePath);
+            ClassPathResource connectionProfileResource = new ClassPathResource(String.format("static/connection-profiles/%s/connection-%s.json", organization.toLowerCase(), organization.toLowerCase()));
+            File connectionProfileFile = connectionProfileResource.getFile();
             JsonNode connectionProfile = mapper.readTree(connectionProfileFile);
 
             // Retrieve the configuration for the specified organization
@@ -150,13 +151,12 @@ public class FabricUserRegistration {
     private  void saveUserCredentials(String username, Enrollment enrollment, String mspId) throws Exception {
         String org = getOrganizationFromMSP(mspId);
         // Define the wallet directory
-        String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/"+org+"/wallet";
-        File walletDir = new File(WALLET_PATH);
-        if (!walletDir.exists()) {
-            walletDir.mkdirs();
-        }
+        ClassPathResource walletResource = new ClassPathResource("static/connection-profiles/" + org + "/wallet");
+        File walletDir = walletResource.getFile();
+
         // Construct the path for the user's JSON wallet entry
-        File walletFile = Paths.get(WALLET_PATH, username + ".id").toFile();
+        File walletFile = new File(walletDir, username + ".id");
+
 
         // Convert the private key to PEM format (already PEM encoded)
         String privateKeyPem = Identities.toPemString(enrollment.getKey());

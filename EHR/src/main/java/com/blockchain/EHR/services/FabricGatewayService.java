@@ -54,9 +54,9 @@ public class FabricGatewayService {
         String grpcUrl = connectionProfile.path("peers").path(peerName).path("url").asText();
         String tlsCertPem = connectionProfile.path("peers").path(peerName).path("tlsCACerts").path("pem").asText();
 
-        // Load user credentials from the wallet
-        String WALLET_PATH = "EHR/src/main/resources/static/connection-profiles/" + orgName + "/wallet";
-        Path userFilePath = Paths.get(WALLET_PATH, username + ".id");
+        ClassPathResource walletResource = new ClassPathResource("static/connection-profiles/" + orgName + "/wallet");
+        Path walletPath = walletResource.getFile().toPath();
+        Path userFilePath = walletPath.resolve(username + ".id");
         JsonNode userCredentials = mapper.readTree(userFilePath.toFile());
 
         String certificatePem = userCredentials.path("credentials").path("certificate").asText();

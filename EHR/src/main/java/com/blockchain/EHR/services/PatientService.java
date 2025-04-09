@@ -73,14 +73,10 @@ public class PatientService {
         return transactions;
     }
 
-    public List<String> getPendingRequest(String pid) {
+    public List<Pending> getPendingRequest(String pid) {
         List<Pending> pendingsList= pendingRepository.findAllByPid(pid);
-        List<String> doctors = new ArrayList<>();
-        for (Pending pending: pendingsList){
-            if(pending.getStatus().equals("Requested"))
-                doctors.add(pending.getDid());
-        }
-        return doctors;
+        pendingsList.removeIf(pending -> !pending.getStatus().equals("Requested"));
+        return pendingsList;
     }
 
     public void updateStatus(String pid, String did, String status,String mspId) throws Exception {
@@ -93,27 +89,35 @@ public class PatientService {
         String hash = ehrService.getHash(ehrDocument);
         System.out.println(status);
         String s;
-        if(status.equals("Accepted")){
-            String[] args = {pid,did};
-            String response = fabricService.submitTransaction("mychannel","ehr","getEHRRecord",args,pid,mspId);
-            if(response.startsWith("Transaction")) {
-                System.out.println("creating EHR");
-                String[] create = {did, pid, hash, LocalDate.now().toString()};
-                s = fabricService.submitTransaction("mychannel", "ehr", "createEHRRecord", create, pid, mspId);
-                if (s.startsWith("Transaction"))
-                    throw new RuntimeException("EHR creation failed:" + s);
+        switch (status) {
+            case "Accepted" -> {
+                String[] args = {pid, did};
+                String response = fabricService.submitTransaction("mychannel", "ehr", "getEHRRecord", args, pid, mspId);
+                if (response.startsWith("Transaction")) {
+                    System.out.println("creating EHR");
+                    String[] create = {did, pid, hash, LocalDate.now().toString()};
+                    s = fabricService.submitTransaction("mychannel", "ehr", "createEHRRecord", create, pid, mspId);
+                    if (s.startsWith("Transaction"))
+                        throw new RuntimeException("EHR creation failed:" + s);
+                }else{
+                    String[] activate = {did, pid, hash, LocalDate.now().toString()};
+                    s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
+                    if (s.startsWith("Transaction"))
+                        throw new RuntimeException("EHR revoke update failed: " + s);
+                }
             }
-        }else if(status.equals("Revoke")) {
-            String[] activate = {did, pid, LocalDate.now().toString()};
-            s = fabricService.submitTransaction("mychannel", "ehr", "revokeAccess", activate, pid, mspId);
-            if (s.startsWith("Transaction"))
-                throw new RuntimeException("EHR revoke update failed: " + s);
+            case "Revoke" -> {
+                String[] activate = {did, pid, hash,LocalDate.now().toString()};
+                s = fabricService.submitTransaction("mychannel", "ehr", "revokeAccess", activate, pid, mspId);
+                if (s.startsWith("Transaction"))
+                    throw new RuntimeException("EHR revoke update failed: " + s);
 
-        }else if (status.equals("Activate")) {
-            String[] activate = {did, pid, LocalDate.now().toString()};
-            s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
-            if (s.startsWith("Transaction"))
-                throw new RuntimeException("EHR revoke update failed: " + s);
+            }
+            case "Activate" -> {
+                String[] activate = {did, pid, hash, LocalDate.now().toString()};
+                s = fabricService.submitTransaction("mychannel", "ehr", "activateAccess", activate, pid, mspId);
+                if (s.startsWith("Transaction"))
+                    throw new RuntimeException("EHR revoke update failed: " + s);
 //            Contract contract = fabricService.getContract("mychannel", "ehr", pid, mspId);
 //
 //            // Build and endorse the proposal
@@ -139,6 +143,7 @@ public class PatientService {
 //                System.err.println("Unexpected error: " + e.getMessage());
 //            }
 
+            }
         }
         pending.setStatus(status);
         pendingRepository.save(pending);

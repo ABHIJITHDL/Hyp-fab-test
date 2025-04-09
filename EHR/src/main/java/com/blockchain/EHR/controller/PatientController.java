@@ -79,7 +79,7 @@ public class PatientController {
 
 
     @GetMapping("/request")
-    public List<String> getPendingRequests(HttpServletRequest request){
+    public List<Pending> getPendingRequests(HttpServletRequest request){
         System.out.println("pending request");
         String jwt = jwtUtils.getJwtFromHeader(request);
         String pid = jwtUtils.getUserNameFromJwtToken(jwt);
@@ -90,6 +90,7 @@ public class PatientController {
     public void updatePendingRequest(HttpServletRequest request,
                                      @PathVariable String did,
                                      @RequestParam String status){
+        System.out.println("Update Pending");
         String jwt = jwtUtils.getJwtFromHeader(request);
         String pid = jwtUtils.getUserNameFromJwtToken(jwt);
         String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
