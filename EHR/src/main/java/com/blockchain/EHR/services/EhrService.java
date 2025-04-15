@@ -68,6 +68,21 @@ public class EhrService {
         }
     }
 
+    public EhrDocument getEhrDocumentForPatient(String patientId, String mspId) {
+        Optional<Patient> patientOptional = patientRepository.findById(patientId);
+        if (patientOptional.isPresent()) {
+            try {
+                String encryptedEhr = patientOptional.get().getEhrDocument();
+                String decryptedEhrJson = decrypt(encryptedEhr); // Decrypt JSON
+
+                return objectMapper.readValue(decryptedEhrJson, EhrDocument.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     public EhrDocument getEhrDocument(String patientId, String did, String mspId) {
         Optional<Patient> patientOptional = patientRepository.findById(patientId);
         if (patientOptional.isPresent()) {

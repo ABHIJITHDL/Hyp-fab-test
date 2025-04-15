@@ -2,10 +2,13 @@ package com.blockchain.EHR.controller;
 
 
 import com.blockchain.EHR.jwt.JwtUtils;
+import com.blockchain.EHR.model.EhrDocument;
 import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.Pending;
 import com.blockchain.EHR.model.Transaction;
 import com.blockchain.EHR.repository.PatientRepository;
+import com.blockchain.EHR.repository.PendingRepository;
+import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.PatientService;
 import com.blockchain.EHR.services.PdfService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,7 +52,9 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
     @Autowired
-    com.blockchain.EHR.repository.PendingRepository pendingRepository;
+    private PendingRepository pendingRepository;
+    @Autowired
+    private EhrService ehrService;
 
 
     @GetMapping("/accepted")
@@ -65,6 +70,23 @@ public class PatientController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/view-ehr")
+    public ResponseEntity<EhrDocument> viewEhr(HttpServletRequest request) {
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String patientId = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+        if (!"Org2MSP".equals(mspId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        EhrDocument ehrDocument= ehrService.getEhrDocumentForPatient(patientId,mspId);
+        if(ehrDocument!=null){
+            System.out.println("Returning document");
+            return new ResponseEntity<>(ehrDocument,HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/revoked")

@@ -7,6 +7,7 @@ import com.blockchain.EHR.model.Patient;
 import com.blockchain.EHR.model.PatientStatus;
 import com.blockchain.EHR.model.Pending;
 import com.blockchain.EHR.repository.PatientRepository;
+import com.blockchain.EHR.repository.PendingRepository;
 import com.blockchain.EHR.services.DoctorService;
 import com.blockchain.EHR.services.EhrService;
 import com.blockchain.EHR.services.PdfService;
@@ -96,6 +97,16 @@ public class DoctorController {
             return new ResponseEntity<>(ehrDocument,HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/requests")
+    public ResponseEntity<?> getAllRequests(HttpServletRequest request){
+        String jwt = jwtUtils.getJwtFromHeader(request);
+        String did = jwtUtils.getUserNameFromJwtToken(jwt);
+        String mspId = jwtUtils.getMspIdFromJwtToken(jwt);
+
+        List<Pending> patientStatuses = pendingRepository.findAllByDid(did);
+        return new ResponseEntity<>(patientStatuses,HttpStatus.OK);
     }
 
     // Update EHR document (only by approved doctors)
