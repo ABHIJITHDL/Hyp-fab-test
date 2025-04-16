@@ -84,10 +84,8 @@ public class PatientService {
         if (pending == null) {
             throw new RuntimeException("No pending record found for pid: " + pid + " and did: " + did);
         }
-        System.out.println(pid + " " + did+ " "+pending);
         EhrDocument ehrDocument = ehrService.fetchPdf(pid);
         String hash = ehrService.getHash(ehrDocument);
-        System.out.println(status);
         String s;
         switch (status) {
             case "Accepted" -> {
@@ -106,7 +104,7 @@ public class PatientService {
                         throw new RuntimeException("EHR revoke update failed: " + s);
                 }
             }
-            case "Revoke" -> {
+            case "Revoked" -> {
                 String[] activate = {did, pid, hash,LocalDate.now().toString()};
                 s = fabricService.submitTransaction("mychannel", "ehr", "revokeAccess", activate, pid, mspId);
                 if (s.startsWith("Transaction"))
